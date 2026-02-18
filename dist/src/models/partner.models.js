@@ -1,0 +1,6 @@
+import { z } from "zod";
+export const partnerSchema = z.object({
+    name: z.string().min(1, "Partner name is required"),
+    category: z.enum(["INSURANCE", "FUNDING"]).default("INSURANCE"),
+});
+//# sourceMappingURL=partner.models.js.map

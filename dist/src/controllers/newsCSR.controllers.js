@@ -1,0 +1,90 @@
+import { customCatch } from "../utils/customCatch.js";
+import { responseSuccess } from "../utils/response.js";
+import { NewsCSRServices } from "../services/newsCSR.services.js";
+import { newsCSRCreateSchema, newsCSRUpdateSchema, } from "../models/newsCSR.models.js";
+import { RevalidatedServices } from "../services/revalidated.services.js";
+export class NewsCSRControllers {
+    static async getAll(req, res) {
+        try {
+            const data = await NewsCSRServices.getAll();
+            responseSuccess(res, 200, "Get all CSR news success", data);
+        }
+        catch (e) {
+            customCatch(e, res);
+        }
+    }
+    static async getById(req, res) {
+        try {
+            const { id } = req.params;
+            if (!id)
+                throw new Error("ID is required");
+            const data = await NewsCSRServices.getById(id);
+            responseSuccess(res, 200, "Get CSR news by ID success", data);
+        }
+        catch (e) {
+            customCatch(e, res);
+        }
+    }
+    static async create(req, res) {
+        try {
+            const files = req.files;
+            const imageFiles = files?.images ?? [];
+            const authorImageFile = files?.author_image?.[0];
+            const validatedBody = newsCSRCreateSchema.parse(req.body);
+            const data = await NewsCSRServices.create(validatedBody, imageFiles, authorImageFile);
+            await RevalidatedServices.revalidated("news");
+            await RevalidatedServices.revalidated("home");
+            responseSuccess(res, 201, "CSR news created successfully", data);
+        }
+        catch (e) {
+            customCatch(e, res);
+        }
+    }
+    static async update(req, res) {
+        try {
+            const { id } = req.params;
+            if (!id)
+                throw new Error("ID is required");
+            const files = req.files;
+            const newImageFiles = files?.images ?? [];
+            const authorImageFile = files?.author_image?.[0];
+            const validatedBody = newsCSRUpdateSchema.parse(req.body);
+            const data = await NewsCSRServices.update(id, validatedBody, newImageFiles, authorImageFile);
+            await RevalidatedServices.revalidated("news");
+            await RevalidatedServices.revalidated("home");
+            responseSuccess(res, 200, "CSR news updated successfully", data);
+        }
+        catch (e) {
+            customCatch(e, res);
+        }
+    }
+    static async delete(req, res) {
+        try {
+            const { id } = req.params;
+            if (!id)
+                throw new Error("ID is required");
+            await NewsCSRServices.delete(id);
+            await RevalidatedServices.revalidated("news");
+            await RevalidatedServices.revalidated("home");
+            responseSuccess(res, 200, "CSR news deleted successfully");
+        }
+        catch (e) {
+            customCatch(e, res);
+        }
+    }
+    static async togglePublish(req, res) {
+        try {
+            const { id } = req.params;
+            if (!id)
+                throw new Error("ID is required");
+            const data = await NewsCSRServices.togglePublish(id);
+            await RevalidatedServices.revalidated("news");
+            await RevalidatedServices.revalidated("home");
+            responseSuccess(res, 200, "CSR news publish status toggled", data);
+        }
+        catch (e) {
+            customCatch(e, res);
+        }
+    }
+}
+//# sourceMappingURL=newsCSR.controllers.js.map
