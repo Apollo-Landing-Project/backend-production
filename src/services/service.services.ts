@@ -3,21 +3,10 @@ import fs from "fs";
 import path from "path";
 import "dotenv/config";
 import type { ServiceItemInput } from "../models/service.models.js";
-
-const deleteFile = (url: string | null) => {
-	if (!url) return;
-	const filename = url.split("/").pop();
-	if (filename) {
-		const filePath = path.join(process.cwd(), "storage/images", filename);
-		if (fs.existsSync(filePath))
-			try {
-				fs.unlinkSync(filePath);
-			} catch {}
-	}
-};
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 const getFileUrl = (file?: Express.Multer.File) =>
-	file ? `${process.env.HOST_URL}/storage/images/${file.filename}` : null;
+	file ? `${process.env.HOST_URL}/images/${file.filename}` : null;
 
 export class ServiceItemService {
 	static async getAll() {
@@ -33,7 +22,7 @@ export class ServiceItemService {
 	static async getById(id: string) {
 		const data = await db.service.findUnique({
 			where: { id },
-		include: { serviceId: true, serviceEn: true,  },
+			include: { serviceId: true, serviceEn: true },
 		});
 		if (!data) throw new Error("Service not found");
 		return data;
@@ -88,7 +77,7 @@ export class ServiceItemService {
 
 		let bg_image = existing.bg_image;
 		if (file) {
-			deleteFile(existing.bg_image);
+			deleteWebDavFile(existing.bg_image, "images");
 			bg_image = getFileUrl(file);
 		}
 
@@ -127,7 +116,7 @@ export class ServiceItemService {
 
 	static async delete(id: string) {
 		const existing = await this.getById(id);
-		deleteFile(existing.bg_image);
+		deleteWebDavFile(existing.bg_image, "images");
 		return await db.service.delete({ where: { id } });
 	}
 

@@ -3,6 +3,7 @@ import { db } from "../lib/prisma.js";
 import type { HomePageCreateInput } from "../models/homePage.models.js";
 import fs from "fs";
 import path from "path";
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 export class HomePageServices {
 	static async create(
@@ -11,7 +12,7 @@ export class HomePageServices {
 	) {
 		const heroSlidesData = file_image.map((file, idx) => ({
 			order: idx,
-			bg_image: `${envConfig.host_url}/storage/images/${file.filename}`,
+			bg_image: `${envConfig.host_url}/images/${file.filename}`,
 			title_id: (data as any)[`hero_title_${idx}`] || null,
 			desc_id: (data as any)[`hero_desc_${idx}`] || null,
 			title_en: (data as any)[`hero_title_en_${idx}`] || null,
@@ -85,13 +86,13 @@ export class HomePageServices {
 
 	static async getAll() {
 		return await db.homePage.findMany({
-			orderBy: {createdAt: "desc"},
+			orderBy: { createdAt: "desc" },
 			include: {
-				homePageId:true,
-				homePageEn:true,
-				heroSlides: true
-			}
-		})
+				homePageId: true,
+				homePageEn: true,
+				heroSlides: true,
+			},
+		});
 	}
 
 	static async getById(id: string) {
@@ -127,11 +128,7 @@ export class HomePageServices {
 		// Delete physical hero slide images
 		data.heroSlides.forEach((slide) => {
 			if (slide.bg_image) {
-				const filename = slide.bg_image.split("/").pop();
-				if (filename) {
-					const filePath = path.join("/apollo/storage/images", filename);
-					if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-				}
+				deleteWebDavFile(slide.bg_image, "images");
 			}
 		});
 
@@ -151,9 +148,9 @@ export class HomePageServices {
 		if (!existing) throw new Error("Not found");
 
 		const imageStatus =
-			Array.isArray(data.image_status)
-				? data.image_status
-				: JSON.parse(data.image_status || '["keep","keep","keep"]');
+			Array.isArray(data.image_status) ?
+				data.image_status
+			:	JSON.parse(data.image_status || '["keep","keep","keep"]');
 
 		let fileIndex = 0;
 
@@ -165,16 +162,12 @@ export class HomePageServices {
 			if (imageStatus[i] === "change") {
 				// Delete old image
 				if (existingSlide?.bg_image) {
-					const oldFilename = existingSlide.bg_image.split("/").pop();
-					if (oldFilename) {
-						const oldPath = path.join("/apollo/storage/images", oldFilename);
-						if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-					}
+					deleteWebDavFile(existingSlide.bg_image, "images");
 				}
 
 				const newFile = files[fileIndex];
 				if (newFile) {
-					bgImage = `${envConfig.host_url}/storage/images/${newFile.filename}`;
+					bgImage = `${envConfig.host_url}/images/${newFile.filename}`;
 					fileIndex++;
 				}
 			}

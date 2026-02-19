@@ -6,24 +6,10 @@ import type {
 	NewsCSRCreateInput,
 	NewsCSRUpdateInput,
 } from "../models/newsCSR.models.js";
-
-const IMAGE_DIR = "/apollo/storage/images";
-
-const deleteFile = (url: string | null | undefined) => {
-	if (!url) return;
-	const filename = url.split("/").pop();
-	if (filename) {
-		const filePath = path.join(IMAGE_DIR, filename);
-		if (fs.existsSync(filePath)) {
-			try {
-				fs.unlinkSync(filePath);
-			} catch {}
-		}
-	}
-};
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 const getFileUrl = (file?: Express.Multer.File) =>
-	file ? `${envConfig.host_url}/storage/images/${file.filename}` : null;
+	file ? `${envConfig.host_url}/images/${file.filename}` : null;
 
 export class NewsCSRServices {
 	static async create(
@@ -35,7 +21,7 @@ export class NewsCSRServices {
 
 		// Build CSR image data with descriptions
 		const csrImages = imageFiles.map((file, index) => ({
-			image: `${envConfig.host_url}/storage/images/${file.filename}`,
+			image: `${envConfig.host_url}/images/${file.filename}`,
 			description_id: data.images_description_id?.[index] ?? null,
 			description_en: data.images_description_en?.[index] ?? null,
 		}));
@@ -110,10 +96,10 @@ export class NewsCSRServices {
 		// Handle author image
 		let newAuthorImage: string | null = existing.author_image;
 		if (data.author_image_status === "change") {
-			deleteFile(existing.author_image);
+			deleteWebDavFile(existing.author_image, "images");
 			newAuthorImage = getFileUrl(authorImageFile);
 		} else if (data.author_image_status === "remove") {
-			deleteFile(existing.author_image);
+			deleteWebDavFile(existing.author_image, "images");
 			newAuthorImage = null;
 		}
 
@@ -124,7 +110,7 @@ export class NewsCSRServices {
 				deletedImageIds.includes(img.id),
 			);
 			for (const img of imagesToDelete) {
-				deleteFile(img.image);
+				deleteWebDavFile(img.image, "images");
 			}
 			await db.newsCSRImage.deleteMany({
 				where: { id: { in: deletedImageIds } },
@@ -133,7 +119,7 @@ export class NewsCSRServices {
 
 		// Add new images
 		const newImages = newImageFiles.map((file, index) => ({
-			image: `${envConfig.host_url}/storage/images/${file.filename}`,
+			image: `${envConfig.host_url}/images/${file.filename}`,
 			description_id: data.images_description_id?.[index] ?? null,
 			description_en: data.images_description_en?.[index] ?? null,
 			newsCSRId: id,
@@ -186,9 +172,9 @@ export class NewsCSRServices {
 		if (!existing) throw new Error("CSR News not found");
 
 		// Delete all image files
-		deleteFile(existing.author_image);
+		deleteWebDavFile(existing.author_image, "images");
 		for (const img of existing.newsCSRImage) {
-			deleteFile(img.image);
+			deleteWebDavFile(img.image, "images");
 		}
 
 		// Cascade delete handles relations

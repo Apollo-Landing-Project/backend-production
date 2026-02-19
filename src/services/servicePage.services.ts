@@ -3,21 +3,10 @@ import fs from "fs";
 import path from "path";
 import "dotenv/config";
 import type { ServicePageInput } from "../models/servicePage.models.js";
-
-const deleteFile = (url: string | null) => {
-	if (!url) return;
-	const filename = url.split("/").pop();
-	if (filename) {
-		const filePath = path.join(process.cwd(), "storage/images", filename);
-		if (fs.existsSync(filePath))
-			try {
-				fs.unlinkSync(filePath);
-			} catch {}
-	}
-};
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 const getFileUrl = (file?: Express.Multer.File) =>
-	file ? `${process.env.HOST_URL}/storage/images/${file.filename}` : null;
+	file ? `${process.env.HOST_URL}/images/${file.filename}` : null;
 
 export class ServicePageService {
 	static async getAll() {
@@ -83,7 +72,7 @@ export class ServicePageService {
 		let hero_bg = existing.hero_bg;
 
 		if (file) {
-			deleteFile(existing.hero_bg);
+			deleteWebDavFile(existing.hero_bg, "images");
 			hero_bg = getFileUrl(file);
 		}
 
@@ -136,7 +125,7 @@ export class ServicePageService {
 
 		if (!data) throw new Error("Page not found");
 
-		deleteFile(data.hero_bg);
+		deleteWebDavFile(data.hero_bg, "images");
 		await db.servicePageId.delete({ where: { servicePageId: id } });
 		await db.servicePageEn.delete({ where: { servicePageId: id } });
 

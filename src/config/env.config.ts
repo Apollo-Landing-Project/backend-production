@@ -9,4 +9,6 @@ export const envConfig = {
 	jwt_secret: process.env.JWT_SECRET!,
 	landing_url: process.env.LANDING_URL!,
 	secret_revalidated: process.env.SECRET_VALIDATED!,
+	web_disk_username: process.env.USERNAME_WEB_DISK!,
+	web_disk_password: process.env.PASSWORD_WEB_DISK!,
 };

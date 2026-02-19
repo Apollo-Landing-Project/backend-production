@@ -6,6 +6,7 @@ import type {
 	ReportCreateInput,
 	ReportUpdateInput,
 } from "../models/report.models.js";
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 export class ReportServices {
 	static async create(
@@ -16,17 +17,17 @@ export class ReportServices {
 	) {
 		let fileUrl = null;
 		if (file) {
-			fileUrl = `${envConfig.host_url}/storage/files/${file.filename}`;
+			fileUrl = `${envConfig.host_url}/files/${file.filename}`;
 		}
 
 		let newsImageUrl = null;
 		if (newsImage) {
-			newsImageUrl = `${envConfig.host_url}/storage/files/${newsImage.filename}`;
+			newsImageUrl = `${envConfig.host_url}/files/${newsImage.filename}`;
 		}
 
 		let newsAuthorImageUrl = null;
 		if (newsAuthorImage) {
-			newsAuthorImageUrl = `${envConfig.host_url}/storage/files/${newsAuthorImage.filename}`;
+			newsAuthorImageUrl = `${envConfig.host_url}/files/${newsAuthorImage.filename}`;
 		}
 
 		const report = await db.report.create({
@@ -39,31 +40,38 @@ export class ReportServices {
 				is_publish: data.is_publish ?? true,
 				reportCategoryId: data.reportCategoryId,
 				file_url: fileUrl,
-				...(data.news_content_id || data.news_content_en || newsImageUrl || newsAuthorImageUrl ? {
-					news: {
-						create: {
-							isPublished: data.is_publish ?? true,
-							image: newsImageUrl,
-							author: data.news_author ?? null,
-							author_image: newsAuthorImageUrl,
-							publishedAt: data.publish_at,
-							newsNewsId: {
-								create: {
-									title: data.title_id ?? null,
-									description: data.description_id ?? null,
-									content: data.news_content_id ?? null,
+				...((
+					data.news_content_id ||
+					data.news_content_en ||
+					newsImageUrl ||
+					newsAuthorImageUrl
+				) ?
+					{
+						news: {
+							create: {
+								isPublished: data.is_publish ?? true,
+								image: newsImageUrl,
+								author: data.news_author ?? null,
+								author_image: newsAuthorImageUrl,
+								publishedAt: data.publish_at,
+								newsNewsId: {
+									create: {
+										title: data.title_id ?? null,
+										description: data.description_id ?? null,
+										content: data.news_content_id ?? null,
+									},
 								},
-							},
-							newsNewsEn: {
-								create: {
-									title: data.title_en ?? null,
-									description: data.description_en ?? null,
-									content: data.news_content_en ?? null,
+								newsNewsEn: {
+									create: {
+										title: data.title_en ?? null,
+										description: data.description_en ?? null,
+										content: data.news_content_en ?? null,
+									},
 								},
 							},
 						},
-					},
-				} : {}),
+					}
+				:	{}),
 			},
 		});
 	}
@@ -89,8 +97,8 @@ export class ReportServices {
 				news: {
 					include: {
 						newsNewsEn: true,
-						newsNewsId: true
-					}
+						newsNewsId: true,
+					},
 				},
 			},
 		});
@@ -115,14 +123,10 @@ export class ReportServices {
 		// Handle Report file changes
 		if (data.file_status === "change") {
 			if (existing.file_url) {
-				const oldFilename = existing.file_url.split("/").pop();
-				if (oldFilename) {
-					const oldPath = path.join("/apollo/storage/files", oldFilename);
-					if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-				}
+				deleteWebDavFile(existing.file_url, "files");
 			}
 			if (file) {
-				newFileUrl = `${envConfig.host_url}/storage/files/${file.filename}`;
+				newFileUrl = `${envConfig.host_url}/files/${file.filename}`;
 			} else {
 				newFileUrl = null;
 			}
@@ -133,26 +137,18 @@ export class ReportServices {
 		if (newsImage) {
 			// Delete old news image if exists
 			if (existing.news[0]?.image) {
-				const oldFilename = existing.news[0]?.image.split("/").pop();
-				if (oldFilename) {
-					const oldPath = path.join("/apollo/storage/files", oldFilename);
-					if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-				}
+				deleteWebDavFile(existing.news[0].image, "files");
 			}
-			newsImageUrl = `${envConfig.host_url}/storage/files/${newsImage.filename}`;
+			newsImageUrl = `${envConfig.host_url}/files/${newsImage.filename}`;
 		}
 
 		let newsAuthorImageUrl = existing.news[0]?.author_image ?? null;
 		if (newsAuthorImage) {
 			// Delete old author image if exists
 			if (existing.news[0]?.author_image) {
-				const oldFilename = existing.news[0].author_image.split("/").pop();
-				if (oldFilename) {
-					const oldPath = path.join("/apollo/storage/files", oldFilename);
-					if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-				}
+				deleteWebDavFile(existing.news[0].author_image, "files");
 			}
-			newsAuthorImageUrl = `${envConfig.host_url}/storage/files/${newsAuthorImage.filename}`;
+			newsAuthorImageUrl = `${envConfig.host_url}/files/${newsAuthorImage.filename}`;
 		}
 
 		const report = await db.report.update({
@@ -204,7 +200,12 @@ export class ReportServices {
 					},
 				} as any,
 			});
-		} else if (data.news_content_id || data.news_content_en || newsImageUrl || newsAuthorImageUrl) {
+		} else if (
+			data.news_content_id ||
+			data.news_content_en ||
+			newsImageUrl ||
+			newsAuthorImageUrl
+		) {
 			// Create if not exists AND content is provided
 			await db.newsNews.create({
 				data: {
@@ -241,11 +242,7 @@ export class ReportServices {
 
 		// Remove file
 		if (data.file_url) {
-			const filename = data.file_url.split("/").pop();
-			if (filename) {
-				const filePath = path.join("/apollo/storage/files", filename);
-				if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-			}
+			deleteWebDavFile(data.file_url, "files");
 		}
 		return await db.$transaction(async (tx) => {
 			const news = await tx.newsNews.findFirst({

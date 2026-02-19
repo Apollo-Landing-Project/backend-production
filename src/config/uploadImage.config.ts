@@ -1,66 +1,84 @@
 import multer, { type FileFilterCallback, type StorageEngine } from "multer";
 import path from "path";
-import fs from "fs";
+import { type WebDAVClient } from "webdav";
 import type { Request } from "express";
+import { client } from "./webdav.config.js";
 
-const BASE_DIR = "/apollo/storage/images";
+const BASE_DIR = "/images";
 
-// Format tanggal & waktu
+// Helper: Format Timestamp
 function getTimestamp(): string {
 	const now = new Date();
 	const date = now.toISOString().slice(0, 10).replace(/-/g, "");
 	const time = now.toTimeString().slice(0, 8).replace(/:/g, "");
-	const ms = now.getMilliseconds().toString().padStart(3, "0");
 	const rand = Math.random().toString(36).slice(2, 6);
-
-	return `${date}-${time}${ms}-${rand}`;
+	return `${date}-${time}-${rand}`;
 }
 
-// Sanitasi prefix
-function sanitize(text = "file"): string {
+function sanitize(text = "image"): string {
 	return text.toLowerCase().replace(/[^a-z0-9-_]/g, "");
 }
 
-// Pastikan folder ada
-function ensureDir(dir: string): void {
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true });
+// 2. Custom WebDAV Storage Engine
+class WebDavStorage implements StorageEngine {
+	private client: WebDAVClient;
+	private basePath: string;
+
+	constructor(client: WebDAVClient, basePath: string) {
+		this.client = client;
+		this.basePath = basePath;
+	}
+
+	_handleFile(
+		req: Request,
+		file: Express.Multer.File,
+		cb: (error?: any, info?: Partial<Express.Multer.File>) => void,
+	): void {
+		const ext = path.extname(file.originalname).toLowerCase();
+		const prefix = sanitize(req.body?.prefix as string);
+		const filename = `${prefix}-${getTimestamp()}${ext}`;
+		const remotePath = `${this.basePath}/${filename}`;
+
+		const remoteStream = this.client.createWriteStream(remotePath);
+		// Di dalam _handleFile sebelum pipe
+		// const remotePath = `${this.basePath}/${filename}`;
+		console.log("Mengunggah ke path:", remotePath);
+
+		file.stream.pipe(remoteStream);
+
+		remoteStream.on("error", (err) => {
+			cb(err);
+		});
+
+		remoteStream.on("finish", () => {
+			cb(null, {
+				path: remotePath,
+				filename: filename,
+				destination: this.basePath,
+			});
+		});
+	}
+
+	_removeFile(
+		req: Request,
+		file: Express.Multer.File,
+		cb: (error: Error | null) => void,
+	): void {
+		this.client
+			.deleteFile(file.path)
+			.then(() => cb(null))
+			.catch((err: any) => cb(err)); // Type casting error ke any atau Error
 	}
 }
 
-// Storage engine dengan type-safe callback
-const storage: StorageEngine = multer.diskStorage({
-	destination: function (
-		req: Request,
-		file: Express.Multer.File,
-		cb: (error: Error | null, destination: string) => void,
-	) {
-		ensureDir(BASE_DIR);
-		cb(null, BASE_DIR);
-	},
+const storage = new WebDavStorage(client, BASE_DIR);
 
-	filename: function (
-		req: Request,
-		file: Express.Multer.File,
-		cb: (error: Error | null, filename: string) => void,
-	) {
-		const ext = path.extname(file.originalname).toLowerCase();
-		const prefix = sanitize((req.body?.prefix as string) || "image");
-		const timestamp = getTimestamp();
-
-		const filename = `${prefix}-${timestamp}${ext}`;
-		cb(null, filename);
-	},
-});
-
-// Filter file dengan typing
 const fileFilter = (
 	req: Request,
 	file: Express.Multer.File,
 	cb: FileFilterCallback,
 ) => {
 	const allowed = ["image/jpeg", "image/png", "image/webp"];
-
 	if (allowed.includes(file.mimetype)) {
 		cb(null, true);
 	} else {

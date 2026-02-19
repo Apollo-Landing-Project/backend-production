@@ -2,23 +2,11 @@ import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
-import type { CarGalleryInput } from "../models/service.models.js";
-
-// --- HELPERS ---
-const deleteFile = (url: string | null) => {
-	if (!url) return;
-	const filename = url.split("/").pop();
-	if (filename) {
-		const filePath = path.join(process.cwd(), "storage/images", filename);
-		if (fs.existsSync(filePath))
-			try {
-				fs.unlinkSync(filePath);
-			} catch {}
-	}
-};
+import type { CarGalleryInput } from "../models/service.models.js"
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 const getFileUrl = (file?: Express.Multer.File) =>
-	file ? `${process.env.HOST_URL}/storage/images/${file.filename}` : null;
+	file ? `${process.env.HOST_URL}/images/${file.filename}` : null;
 
 export class CarGalleryService {
 	// --- GET ALL ---
@@ -81,7 +69,7 @@ export class CarGalleryService {
 
 		// Jika ada upload file baru
 		if (file) {
-			deleteFile(existing.car_image); // Hapus file lama
+			deleteWebDavFile(existing.car_image, "images"); // Hapus file lama
 			car_image = getFileUrl(file); // Set file baru
 		}
 
@@ -111,7 +99,7 @@ export class CarGalleryService {
 		const existing = await this.getById(id);
 
 		// Hapus File Fisik
-		deleteFile(existing.car_image);
+		deleteWebDavFile(existing.car_image, "images");
 
 		// Hapus Database (Cascade delete anak-anaknya otomatis via Prisma relation)
 		return await db.carGallery.delete({ where: { id } });

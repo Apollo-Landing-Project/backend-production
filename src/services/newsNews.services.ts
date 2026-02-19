@@ -6,24 +6,10 @@ import type {
 	NewsNewsCreateInput,
 	NewsNewsUpdateInput,
 } from "../models/newsNews.models.js";
-
-const IMAGE_DIR = "/apollo/storage/images";
-
-const deleteFile = (url: string | null | undefined) => {
-	if (!url) return;
-	const filename = url.split("/").pop();
-	if (filename) {
-		const filePath = path.join(IMAGE_DIR, filename);
-		if (fs.existsSync(filePath)) {
-			try {
-				fs.unlinkSync(filePath);
-			} catch {}
-		}
-	}
-};
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 const getFileUrl = (file?: Express.Multer.File) =>
-	file ? `${envConfig.host_url}/storage/images/${file.filename}` : null;
+	file ? `${envConfig.host_url}/images/${file.filename}` : null;
 
 export class NewsNewsServices {
 	static async create(
@@ -96,17 +82,17 @@ export class NewsNewsServices {
 		// Handle main image
 		let newImage: string | null = existing.image;
 		if (data.image_status === "change") {
-			deleteFile(existing.image);
+			deleteWebDavFile(existing.image, "images");
 			newImage = getFileUrl(imageFile);
 		}
 
 		// Handle author image
 		let newAuthorImage: string | null = existing.author_image;
 		if (data.author_image_status === "change") {
-			deleteFile(existing.author_image);
+			deleteWebDavFile(existing.author_image, "images");
 			newAuthorImage = getFileUrl(authorImageFile);
 		} else if (data.author_image_status === "remove") {
-			deleteFile(existing.author_image);
+			deleteWebDavFile(existing.author_image, "images");
 			newAuthorImage = null;
 		}
 
@@ -144,8 +130,8 @@ export class NewsNewsServices {
 		if (!existing) throw new Error("News not found");
 
 		// Delete image files
-		deleteFile(existing.image);
-		deleteFile(existing.author_image);
+		deleteWebDavFile(existing.image, "images");
+		deleteWebDavFile(existing.author_image, "images");
 
 		return await db.newsNews.delete({ where: { id } });
 	}
