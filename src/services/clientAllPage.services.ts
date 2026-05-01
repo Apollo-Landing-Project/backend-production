@@ -567,6 +567,7 @@ export class ClientAllService {
 					description:
 						lang === "en" ? report.description_en : report.description_id,
 					file_url: report.file_url,
+					original_filename: report.original_filename,
 					published_at: report.publish_at,
 					category: report.reportCategory.name,
 				})),

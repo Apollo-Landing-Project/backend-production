@@ -1,12 +1,29 @@
 import type { Request, Response } from "express";
 import { customCatch } from "../utils/customCatch.js";
-import { responseSuccess } from "../utils/response.js";
+import { responseError, responseSuccess } from "../utils/response.js";
 import { ReportServices } from "../services/report.services.js";
 import {
     reportCreateSchema,
     reportUpdateSchema,
 } from "../models/report.models.js";
 import { RevalidatedServices } from "../services/revalidated.services.js";
+import path from "path";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
+
+function buildContentDisposition(filename: string) {
+    const ext = path.extname(filename);
+    const asciiFallbackBase = filename
+        .normalize("NFKD")
+        .replace(/[^\x20-\x7E]/g, "")
+        .replace(/["\\]/g, "")
+        .trim();
+    const asciiFallback =
+        asciiFallbackBase || (ext ? `download${ext}` : "download");
+    const encoded = encodeURIComponent(filename);
+
+    return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encoded}`;
+}
 
 export class ReportControllers {
     static async getAll(req: Request, res: Response) {
@@ -100,6 +117,61 @@ export class ReportControllers {
             responseSuccess(res, 200, "Delete report success", response);
         } catch (e) {
             customCatch(e, res);
+        }
+    }
+
+    static async download(req: Request<{ reportId: string }>, res: Response) {
+        try {
+            const { reportId } = req.params;
+            if (!reportId) {
+                return responseError(res, 400, "Report ID is required");
+            }
+
+            const report = await ReportServices.getDownloadPayload(reportId);
+            if (!report) {
+                return responseError(res, 404, "Report not found");
+            }
+            if (!report.file_url) {
+                return responseError(res, 404, "Report file is not available");
+            }
+
+            const upstream = await fetch(report.file_url);
+            if (!upstream.ok) {
+                return responseError(
+                    res,
+                    502,
+                    `Failed to fetch report file from storage (${upstream.status} ${upstream.statusText})`,
+                );
+            }
+
+            if (!upstream.body) {
+                return responseError(res, 502, "Storage returned an empty file response");
+            }
+
+            const filename = ReportServices.resolveDownloadFilename(report);
+            const contentType =
+                upstream.headers.get("content-type") || "application/octet-stream";
+            const contentLength = upstream.headers.get("content-length");
+
+            res.status(200);
+            res.setHeader("Content-Type", contentType);
+            res.setHeader("Content-Disposition", buildContentDisposition(filename));
+            res.setHeader("Cache-Control", "no-store");
+
+            if (contentLength) {
+                res.setHeader("Content-Length", contentLength);
+            }
+
+            await pipeline(
+                Readable.fromWeb(upstream.body as any),
+                res,
+            );
+        } catch (e) {
+            if (!res.headersSent) {
+                customCatch(e, res);
+            } else {
+                res.end();
+            }
         }
     }
 }

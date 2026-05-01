@@ -1,12 +1,33 @@
 import { envConfig } from "../config/env.config.js";
 import { db } from "../lib/prisma.js";
-import fs from "fs";
 import path from "path";
 import type {
 	ReportCreateInput,
 	ReportUpdateInput,
 } from "../models/report.models.js";
 import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
+
+const DEFAULT_DOWNLOAD_FILENAME = "report.pdf";
+
+function getFilenameFromUrl(fileUrl?: string | null): string | null {
+	if (!fileUrl) return null;
+
+	try {
+		const pathname = new URL(fileUrl).pathname;
+		const filename = path.basename(pathname);
+		return filename ? decodeURIComponent(filename) : null;
+	} catch {
+		const filename = fileUrl.split("/").pop();
+		return filename ? decodeURIComponent(filename) : null;
+	}
+}
+
+function sanitizeDownloadFilename(filename?: string | null): string | null {
+	if (!filename) return null;
+
+	const normalized = filename.replace(/[/\\]/g, "-").replace(/[\r\n]+/g, " ").trim();
+	return normalized || null;
+}
 
 export class ReportServices {
 	static async create(
@@ -40,6 +61,7 @@ export class ReportServices {
 				is_publish: data.is_publish ?? true,
 				reportCategoryId: data.reportCategoryId,
 				file_url: fileUrl,
+				original_filename: file?.originalname ?? null,
 				...((
 					data.news_content_id ||
 					data.news_content_en ||
@@ -74,6 +96,8 @@ export class ReportServices {
 				:	{}),
 			},
 		});
+
+		return report;
 	}
 
 	static async getAll(categoryId?: string) {
@@ -120,6 +144,7 @@ export class ReportServices {
 		if (!existing) throw new Error("Report not found");
 
 		let newFileUrl = existing.file_url;
+		let originalFilename = existing.original_filename;
 		// Handle Report file changes
 		if (data.file_status === "change") {
 			if (existing.file_url) {
@@ -127,8 +152,10 @@ export class ReportServices {
 			}
 			if (file) {
 				newFileUrl = `${envConfig.host_url}/files/${file.filename}`;
+				originalFilename = file.originalname ?? null;
 			} else {
 				newFileUrl = null;
+				originalFilename = null;
 			}
 		}
 
@@ -162,6 +189,7 @@ export class ReportServices {
 				is_publish: data.is_publish ?? undefined,
 				reportCategoryId: data.reportCategoryId ?? undefined,
 				file_url: newFileUrl,
+				original_filename: originalFilename,
 			} as any,
 		});
 
@@ -259,5 +287,27 @@ export class ReportServices {
 				where: { id },
 			});
 		});
+	}
+
+	static async getDownloadPayload(id: string) {
+		return await db.report.findUnique({
+			where: { id },
+			select: {
+				id: true,
+				file_url: true,
+				original_filename: true,
+			},
+		});
+	}
+
+	static resolveDownloadFilename(report: {
+		original_filename?: string | null;
+		file_url?: string | null;
+	}) {
+		return (
+			sanitizeDownloadFilename(report.original_filename) ??
+			sanitizeDownloadFilename(getFilenameFromUrl(report.file_url)) ??
+			DEFAULT_DOWNLOAD_FILENAME
+		);
 	}
 }

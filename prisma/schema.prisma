@@ -634,6 +634,7 @@ model Report {
   description_id String?
   description_en String?
   file_url       String? // ini nantinya berupa pdf/word/excel
+  original_filename String?
   publish_at     DateTime
   is_publish     Boolean  @default(true)
 
