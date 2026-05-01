@@ -1,4 +1,10 @@
+import fs from "node:fs/promises";
 import { client } from "../config/webdav.config.js";
+import {
+	getLocalStorageDir,
+	useLocalStorage,
+} from "../config/uploadStorage.config.js";
+import path from "node:path";
 
 /**
  * Menghapus file dari Web Disk cPanel berdasarkan Full URL
@@ -11,17 +17,21 @@ export const deleteWebDavFile = async (
 	if (!url) return false;
 
 	try {
-		// 1. Ambil nama file dari URL (bagian terakhir setelah '/')
 		const filename = url.split("/").pop();
 		if (!filename) return false;
 
+		if (useLocalStorage()) {
+			const filePath = path.join(getLocalStorageDir(type), filename);
+			await fs.unlink(filePath);
+			console.log(`Berhasil menghapus file lokal: ${filePath}`);
+			return true;
+		}
+
 		const remotePath = `/${type}/${filename}`;
 
-		// 3. Cek keberadaan file di Web Disk
 		const fileExists = await client.exists(remotePath);
 
 		if (fileExists) {
-			// 4. Hapus file dari server Web Disk
 			await client.deleteFile(remotePath);
 			console.log(`Berhasil menghapus: ${remotePath}`);
 			return true;
@@ -30,6 +40,10 @@ export const deleteWebDavFile = async (
 			return false;
 		}
 	} catch (error: any) {
+		if (error?.code === "ENOENT") {
+			console.warn(`File lokal tidak ditemukan untuk dihapus: ${url}`);
+			return false;
+		}
 		console.error("Gagal menghapus file Web Disk:", error.message);
 		return false;
 	}

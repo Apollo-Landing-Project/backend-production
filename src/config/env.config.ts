@@ -11,4 +11,6 @@ export const envConfig = {
 	secret_revalidated: process.env.SECRET_VALIDATED!,
 	web_disk_username: process.env.USERNAME_WEB_DISK!,
 	web_disk_password: process.env.PASSWORD_WEB_DISK!,
+	storage_provider: process.env.STORAGE_PROVIDER || "webdav",
+	ignore_revalidate_errors: process.env.IGNORE_REVALIDATE_ERRORS === "true",
 };

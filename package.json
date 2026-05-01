@@ -11,7 +11,8 @@
 		"db:studio": "npx prisma studio --config ./prisma.config.ts",
 		"db:mig": "npx prisma migrate dev",
 		"db:gen": "prisma generate",
-		"db:push": "npx prisma db push"
+		"db:push": "npx prisma db push",
+		"db:bootstrap-local": "tsx prisma/local-bootstrap.ts"
 	},
 	"keywords": [],
 	"author": "",

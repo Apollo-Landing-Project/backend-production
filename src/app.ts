@@ -1,16 +1,13 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import { authRoutes } from "./routes/auth.routes.js";
 import morgan from "morgan";
 import helmet from "helmet";
 import compression from "compression";
 import { xss } from "express-xss-sanitizer";
 import { router } from "./routes/index.js";
 import cookieParser from "cookie-parser";
-import { createClient } from "webdav";
-import { envConfig } from "./config/env.config.js";
-import { RevalidatedServices } from "./services/revalidated.services.js";
+import { getLocalStorageDir, useLocalStorage } from "./config/uploadStorage.config.js";
 
 const app = express();
 
@@ -41,6 +38,11 @@ app.use(
 		credentials: true,
 	}),
 );
+
+if (useLocalStorage()) {
+	app.use("/api/files", express.static(getLocalStorageDir("files")));
+	app.use("/api/images", express.static(getLocalStorageDir("images")));
+}
 
 app.use("/api", router);
 

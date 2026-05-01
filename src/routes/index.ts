@@ -21,6 +21,14 @@ import { reportRoutes } from "./report.routes.js";
 
 export const router = Router();
 
+router.get("/", (_req: Request, res: Response) => {
+	responseSuccess(res, 200, "API router is available", {
+		health: "/health",
+		client: "/api/client",
+		auth: "/api/auth",
+	});
+});
+
 // CLIENT
 router.use("/client", clientAllPage);
 
