@@ -25,7 +25,7 @@ export class NewsNewsServices {
 				image,
 				author: data.author ?? null,
 				author_image,
-				isPublished: data.isPublished ?? false,
+				isPublished: data.isPublished ?? true,
 				newsNewsId: {
 					create: {
 						title: data.title,

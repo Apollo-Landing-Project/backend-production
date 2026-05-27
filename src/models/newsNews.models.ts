@@ -22,7 +22,7 @@ export const newsNewsCreateSchema = z.object({
 
 	// Global
 	author: z.string().optional(),
-	isPublished: isPublishedField.default(false),
+	isPublished: isPublishedField.default(true),
 });
 
 // --- UPDATE SCHEMA ---
