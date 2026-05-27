@@ -102,7 +102,9 @@ export class NewsNewsServices {
 				image: newImage,
 				author: data.author ?? null,
 				author_image: newAuthorImage,
-				isPublished: data.isPublished ?? false,
+				...(data.isPublished !== undefined ?
+					{ isPublished: data.isPublished }
+				:	{}),
 				newsNewsId: {
 					update: {
 						title: data.title ?? null,

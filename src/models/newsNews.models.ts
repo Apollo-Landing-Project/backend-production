@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+const isPublishedField = z
+	.preprocess((val) => {
+		if (val === "true") return true;
+		if (val === "false") return false;
+		return val;
+	}, z.boolean())
+	.optional();
+
 // --- CREATE SCHEMA ---
 export const newsNewsCreateSchema = z.object({
 	// Indonesia (ID)
@@ -14,18 +22,12 @@ export const newsNewsCreateSchema = z.object({
 
 	// Global
 	author: z.string().optional(),
-	isPublished: z
-		.preprocess((val) => {
-			if (val === "true") return true;
-			if (val === "false") return false;
-			return val;
-		}, z.boolean())
-		.optional()
-		.default(false),
+	isPublished: isPublishedField.default(false),
 });
 
 // --- UPDATE SCHEMA ---
 export const newsNewsUpdateSchema = newsNewsCreateSchema.partial().extend({
+	isPublished: isPublishedField,
 	image_status: z.enum(["keep", "change"]),
 	author_image_status: z
 		.enum(["keep", "change", "remove"])

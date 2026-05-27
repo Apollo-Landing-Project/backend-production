@@ -25,7 +25,10 @@ app.use(xss());
 // gzip compression
 app.use(compression());
 // enable cors
-const allowedOrigins = process.env.ALLOWED_HOSTS?.split(",") || [];
+const allowedOrigins =
+	process.env.ALLOWED_HOSTS?.split(",")
+		.map((origin) => origin.trim())
+		.filter(Boolean) || [];
 app.use(
 	cors({
 		origin(origin, callback) {
