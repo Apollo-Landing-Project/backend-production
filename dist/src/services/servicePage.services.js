@@ -2,20 +2,8 @@ import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
-const deleteFile = (url) => {
-    if (!url)
-        return;
-    const filename = url.split("/").pop();
-    if (filename) {
-        const filePath = path.join(process.cwd(), "storage/images", filename);
-        if (fs.existsSync(filePath))
-            try {
-                fs.unlinkSync(filePath);
-            }
-            catch { }
-    }
-};
-const getFileUrl = (file) => file ? `${process.env.HOST_URL}/storage/images/${file.filename}` : null;
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
+const getFileUrl = (file) => file ? `${process.env.HOST_URL}/images/${file.filename}` : null;
 export class ServicePageService {
     static async getAll() {
         return await db.servicePage.findMany({
@@ -72,7 +60,7 @@ export class ServicePageService {
             throw new Error("Page not found");
         let hero_bg = existing.hero_bg;
         if (file) {
-            deleteFile(existing.hero_bg);
+            deleteWebDavFile(existing.hero_bg, "images");
             hero_bg = getFileUrl(file);
         }
         return await db.servicePage.update({
@@ -120,7 +108,7 @@ export class ServicePageService {
         });
         if (!data)
             throw new Error("Page not found");
-        deleteFile(data.hero_bg);
+        deleteWebDavFile(data.hero_bg, "images");
         await db.servicePageId.delete({ where: { servicePageId: id } });
         await db.servicePageEn.delete({ where: { servicePageId: id } });
         return await db.servicePage.delete({ where: { id } });

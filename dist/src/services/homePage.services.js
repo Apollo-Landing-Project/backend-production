@@ -2,11 +2,12 @@ import { envConfig } from "../config/env.config.js";
 import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 export class HomePageServices {
     static async create(data, file_image) {
         const heroSlidesData = file_image.map((file, idx) => ({
             order: idx,
-            bg_image: `${envConfig.host_url}/storage/images/${file.filename}`,
+            bg_image: `${envConfig.host_url}/images/${file.filename}`,
             title_id: data[`hero_title_${idx}`] || null,
             desc_id: data[`hero_desc_${idx}`] || null,
             title_en: data[`hero_title_en_${idx}`] || null,
@@ -81,8 +82,8 @@ export class HomePageServices {
             include: {
                 homePageId: true,
                 homePageEn: true,
-                heroSlides: true
-            }
+                heroSlides: true,
+            },
         });
     }
     static async getById(id) {
@@ -117,12 +118,7 @@ export class HomePageServices {
         // Delete physical hero slide images
         data.heroSlides.forEach((slide) => {
             if (slide.bg_image) {
-                const filename = slide.bg_image.split("/").pop();
-                if (filename) {
-                    const filePath = path.join("/apollo/storage/images", filename);
-                    if (fs.existsSync(filePath))
-                        fs.unlinkSync(filePath);
-                }
+                deleteWebDavFile(slide.bg_image, "images");
             }
         });
         return await db.$transaction(async (tx) => {
@@ -139,8 +135,8 @@ export class HomePageServices {
         });
         if (!existing)
             throw new Error("Not found");
-        const imageStatus = Array.isArray(data.image_status)
-            ? data.image_status
+        const imageStatus = Array.isArray(data.image_status) ?
+            data.image_status
             : JSON.parse(data.image_status || '["keep","keep","keep"]');
         let fileIndex = 0;
         // Update hero slides
@@ -150,16 +146,11 @@ export class HomePageServices {
             if (imageStatus[i] === "change") {
                 // Delete old image
                 if (existingSlide?.bg_image) {
-                    const oldFilename = existingSlide.bg_image.split("/").pop();
-                    if (oldFilename) {
-                        const oldPath = path.join("/apollo/storage/images", oldFilename);
-                        if (fs.existsSync(oldPath))
-                            fs.unlinkSync(oldPath);
-                    }
+                    deleteWebDavFile(existingSlide.bg_image, "images");
                 }
                 const newFile = files[fileIndex];
                 if (newFile) {
-                    bgImage = `${envConfig.host_url}/storage/images/${newFile.filename}`;
+                    bgImage = `${envConfig.host_url}/images/${newFile.filename}`;
                     fileIndex++;
                 }
             }

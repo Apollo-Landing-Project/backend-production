@@ -12,9 +12,11 @@ import path from "node:path";
  */
 export const deleteWebDavFile = async (
 	url: string | null,
-	type: "files" | "images",
+	fallbackType: "files" | "images",
 ): Promise<boolean> => {
 	if (!url) return false;
+
+	const type = url.includes("/images/") ? "images" : (url.includes("/files/") ? "files" : fallbackType);
 
 	try {
 		const filename = url.split("/").pop();

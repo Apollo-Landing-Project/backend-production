@@ -1,0 +1,2637 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Apollo Backend Production API",
+    "version": "1.0.0",
+    "description": "OpenAPI/Swagger specification generated from the Express routes in `backend-production`. Most CMS endpoints require the `token` cookie returned by `/api/auth/login`."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5050",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    { "name": "System", "description": "Health and router info" },
+    { "name": "Auth", "description": "Authentication endpoints" },
+    { "name": "Client", "description": "Public client-facing endpoints" },
+    { "name": "CMS Pages", "description": "Protected page management endpoints" },
+    { "name": "Service Items", "description": "Protected service item endpoints" },
+    { "name": "Car Gallery", "description": "Protected used car gallery endpoints" },
+    { "name": "News Article", "description": "Protected article news endpoints" },
+    { "name": "News CSR", "description": "Protected CSR news endpoints" },
+    { "name": "Partners", "description": "Protected partner endpoints" },
+    { "name": "Shares", "description": "Protected shareholder endpoints" },
+    { "name": "Report Categories", "description": "Protected report category endpoints" },
+    { "name": "Reports", "description": "Protected investor report endpoints" },
+    { "name": "Translate", "description": "Protected translation endpoint" }
+  ],
+  "security": [
+    {
+      "cookieAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "API running"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Router index",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Router information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register user",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login and set token cookie",
+        "description": "Returns user data and token in the response, and also sets the `token` cookie used by protected endpoints.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login success",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication cookie named `token`."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout and clear token cookie",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Logout success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/client/home": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get home page content",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Home page with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/about-us": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get about us page content",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "About us page with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/service": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get service page content",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Service page with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/news": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get news page content",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News page with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/news/article/{id}": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get news article detail",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          },
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Article detail with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/news/csr/{id}": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get CSR news detail",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          },
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSR detail with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/investor": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Get investor relation page content",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LangQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Investor page with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessWithMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/client/download/{reportId}": {
+      "get": {
+        "tags": ["Client"],
+        "summary": "Download report file",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ReportIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary report file",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "502": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/protected": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Protected token check endpoint",
+        "responses": {
+          "200": {
+            "description": "Token is valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/page/home": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "List home page versions",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["CMS Pages"],
+        "summary": "Create home page",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/HomePageCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/page/home/{id}": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "Get home page by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["CMS Pages"],
+        "summary": "Update home page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/HomePageUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["CMS Pages"],
+        "summary": "Delete home page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/home/{id}/active": {
+      "patch": {
+        "tags": ["CMS Pages"],
+        "summary": "Toggle active home page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/news": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "List news page versions",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["CMS Pages"],
+        "summary": "Create news page",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsPageCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/page/news/{id}": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "Get news page by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["CMS Pages"],
+        "summary": "Update news page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsPageUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["CMS Pages"],
+        "summary": "Delete news page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/news/{id}/active": {
+      "patch": {
+        "tags": ["CMS Pages"],
+        "summary": "Toggle active news page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/about-us": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "List about us page versions",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["CMS Pages"],
+        "summary": "Create about us page",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AboutUsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/about-us/{id}": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "Get about us page by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["CMS Pages"],
+        "summary": "Update about us page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AboutUsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["CMS Pages"],
+        "summary": "Delete about us page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/about-us/{id}/active": {
+      "patch": {
+        "tags": ["CMS Pages"],
+        "summary": "Toggle active about us page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/service": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "List service page versions",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["CMS Pages"],
+        "summary": "Create service page",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ServicePageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/service/{id}": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "Get service page by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["CMS Pages"],
+        "summary": "Update service page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ServicePageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["CMS Pages"],
+        "summary": "Delete service page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/service/{id}/active": {
+      "patch": {
+        "tags": ["CMS Pages"],
+        "summary": "Toggle active service page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/investor": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "List investor page versions",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["CMS Pages"],
+        "summary": "Create investor page",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/InvestorPageCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/investor/{id}": {
+      "get": {
+        "tags": ["CMS Pages"],
+        "summary": "Get investor page by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["CMS Pages"],
+        "summary": "Update investor page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/InvestorPageUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["CMS Pages"],
+        "summary": "Delete investor page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/page/investor/{id}/active": {
+      "patch": {
+        "tags": ["CMS Pages"],
+        "summary": "Toggle active investor page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/service/items": {
+      "get": {
+        "tags": ["Service Items"],
+        "summary": "List service items",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Service Items"],
+        "summary": "Create service item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/service/items/{id}": {
+      "get": {
+        "tags": ["Service Items"],
+        "summary": "Get service item by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Service Items"],
+        "summary": "Update service item",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Service Items"],
+        "summary": "Delete service item",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/service/items/{id}/toggle": {
+      "patch": {
+        "tags": ["Service Items"],
+        "summary": "Toggle service item active status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/service/items/reorder": {
+      "patch": {
+        "tags": ["Service Items"],
+        "summary": "Reorder service items",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderServicesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/car-gallery": {
+      "get": {
+        "tags": ["Car Gallery"],
+        "summary": "List car gallery items",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Car Gallery"],
+        "summary": "Create car gallery item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CarGalleryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/car-gallery/{id}": {
+      "get": {
+        "tags": ["Car Gallery"],
+        "summary": "Get car gallery item by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Car Gallery"],
+        "summary": "Update car gallery item",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CarGalleryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Car Gallery"],
+        "summary": "Delete car gallery item",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-news/upload-content-image": {
+      "post": {
+        "tags": ["News Article"],
+        "summary": "Upload inline content image for article editor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["content_image"],
+                "properties": {
+                  "content_image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-news": {
+      "get": {
+        "tags": ["News Article"],
+        "summary": "List article news",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["News Article"],
+        "summary": "Create article news",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsNewsCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-news/{id}": {
+      "get": {
+        "tags": ["News Article"],
+        "summary": "Get article news by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["News Article"],
+        "summary": "Update article news",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsNewsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["News Article"],
+        "summary": "Delete article news",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-news/{id}/publish": {
+      "patch": {
+        "tags": ["News Article"],
+        "summary": "Toggle article publish status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-csr": {
+      "get": {
+        "tags": ["News CSR"],
+        "summary": "List CSR news",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["News CSR"],
+        "summary": "Create CSR news",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsCSRCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-csr/{id}": {
+      "get": {
+        "tags": ["News CSR"],
+        "summary": "Get CSR news by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["News CSR"],
+        "summary": "Update CSR news",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsCSRUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["News CSR"],
+        "summary": "Delete CSR news",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/news-csr/{id}/publish": {
+      "patch": {
+        "tags": ["News CSR"],
+        "summary": "Toggle CSR publish status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/partner": {
+      "get": {
+        "tags": ["Partners"],
+        "summary": "List partners",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Partners"],
+        "summary": "Create partner",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/partner/{id}": {
+      "get": {
+        "tags": ["Partners"],
+        "summary": "Get partner by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Partners"],
+        "summary": "Update partner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Partners"],
+        "summary": "Delete partner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/shares": {
+      "get": {
+        "tags": ["Shares"],
+        "summary": "List shares entries",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Shares"],
+        "summary": "Create shares entry",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/shares/{id}": {
+      "get": {
+        "tags": ["Shares"],
+        "summary": "Get shares entry by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Shares"],
+        "summary": "Update shares entry",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Shares"],
+        "summary": "Delete shares entry",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/report-category": {
+      "get": {
+        "tags": ["Report Categories"],
+        "summary": "List report categories",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Report Categories"],
+        "summary": "Create report category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCategoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/report-category/{id}": {
+      "get": {
+        "tags": ["Report Categories"],
+        "summary": "Get report category by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Report Categories"],
+        "summary": "Update report category",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCategoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Report Categories"],
+        "summary": "Delete report category",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/report": {
+      "get": {
+        "tags": ["Reports"],
+        "summary": "List reports",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CategoryIdQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Reports"],
+        "summary": "Create report",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/report/{id}": {
+      "get": {
+        "tags": ["Reports"],
+        "summary": "Get report by ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Reports"],
+        "summary": "Update report",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Reports"],
+        "summary": "Delete report",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          }
+        }
+      }
+    },
+    "/api/translate": {
+      "post": {
+        "tags": ["Translate"],
+        "summary": "Translate multiple texts",
+        "description": "Rate limited to 10 requests per minute per IP. Maximum 20 text items and 2000 total characters per request.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Too many translation requests, please try again later."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "Use the `token` cookie returned by `/api/auth/login`."
+      }
+    },
+    "parameters": {
+      "LangQuery": {
+        "name": "lang",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": ["id", "en"]
+        },
+        "description": "Language selector."
+      },
+      "IdPath": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Entity identifier."
+      },
+      "ReportIdPath": {
+        "name": "reportId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Report identifier."
+      },
+      "CategoryIdQuery": {
+        "name": "categoryId",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Optional report category filter."
+      }
+    },
+    "responses": {
+      "SuccessResponse": {
+        "description": "Standard success response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SuccessResponse"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "description": "Standard error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation success"
+          },
+          "data": {}
+        },
+        "required": ["status", "message"]
+      },
+      "SuccessWithMetadataResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Data retrieved successfully"
+          },
+          "data": {},
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "failed"
+          },
+          "message": {
+            "type": "string",
+            "example": "Validation error"
+          },
+          "error": {}
+        },
+        "required": ["status", "message"]
+      },
+      "RegisterInput": {
+        "type": "object",
+        "required": ["email", "password", "name"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "TranslateInput": {
+        "type": "object",
+        "required": ["texts", "target_lang"],
+        "properties": {
+          "texts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_lang": {
+            "type": "string",
+            "enum": ["en", "id"]
+          }
+        }
+      },
+      "ReorderServicesInput": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "order"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "order": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "HomePageCreate": {
+        "type": "object",
+        "required": [
+          "about_us_years_exp",
+          "about_us_products",
+          "about_us_countries",
+          "about_us_brands",
+          "about_us_badge",
+          "about_us_title",
+          "about_us_desc",
+          "services_badge",
+          "services_title",
+          "services_desc",
+          "news_badge",
+          "news_title",
+          "news_desc",
+          "partners_badge",
+          "partners_title",
+          "partners_desc",
+          "contact_title",
+          "contact_desc",
+          "contact_address",
+          "contact_link_map",
+          "about_us_badge_en",
+          "about_us_title_en",
+          "about_us_desc_en",
+          "services_badge_en",
+          "services_title_en",
+          "services_desc_en",
+          "news_badge_en",
+          "news_title_en",
+          "news_desc_en",
+          "partners_badge_en",
+          "partners_title_en",
+          "partners_desc_en",
+          "contact_title_en",
+          "contact_desc_en"
+        ],
+        "properties": {
+          "hero_bg": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "format": "binary"
+            },
+            "description": "Up to 3 hero background images."
+          },
+          "about_us_years_exp": {
+            "type": "integer"
+          },
+          "about_us_products": {
+            "type": "integer"
+          },
+          "about_us_countries": {
+            "type": "integer"
+          },
+          "about_us_brands": {
+            "type": "integer"
+          },
+          "contact_email": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "contact_phone": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hero_title_0": { "type": "string" },
+          "hero_desc_0": { "type": "string" },
+          "hero_title_1": { "type": "string" },
+          "hero_desc_1": { "type": "string" },
+          "hero_title_2": { "type": "string" },
+          "hero_desc_2": { "type": "string" },
+          "hero_title_en_0": { "type": "string" },
+          "hero_desc_en_0": { "type": "string" },
+          "hero_title_en_1": { "type": "string" },
+          "hero_desc_en_1": { "type": "string" },
+          "hero_title_en_2": { "type": "string" },
+          "hero_desc_en_2": { "type": "string" },
+          "about_us_badge": { "type": "string" },
+          "about_us_title": { "type": "string" },
+          "about_us_desc": { "type": "string" },
+          "services_badge": { "type": "string" },
+          "services_title": { "type": "string" },
+          "services_desc": { "type": "string" },
+          "news_badge": { "type": "string" },
+          "news_title": { "type": "string" },
+          "news_desc": { "type": "string" },
+          "partners_badge": { "type": "string" },
+          "partners_title": { "type": "string" },
+          "partners_desc": { "type": "string" },
+          "contact_title": { "type": "string" },
+          "contact_desc": { "type": "string" },
+          "contact_address": { "type": "string" },
+          "contact_link_map": { "type": "string", "format": "uri" },
+          "about_us_badge_en": { "type": "string" },
+          "about_us_title_en": { "type": "string" },
+          "about_us_desc_en": { "type": "string" },
+          "services_badge_en": { "type": "string" },
+          "services_title_en": { "type": "string" },
+          "services_desc_en": { "type": "string" },
+          "news_badge_en": { "type": "string" },
+          "news_title_en": { "type": "string" },
+          "news_desc_en": { "type": "string" },
+          "partners_badge_en": { "type": "string" },
+          "partners_title_en": { "type": "string" },
+          "partners_desc_en": { "type": "string" },
+          "contact_title_en": { "type": "string" },
+          "contact_desc_en": { "type": "string" }
+        }
+      },
+      "HomePageUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HomePageCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "image_status": {
+                "type": "string",
+                "description": "JSON array string with exactly 3 items, for example `[\"keep\",\"change\",\"keep\"]`."
+              }
+            }
+          }
+        ]
+      },
+      "NewsPageCreate": {
+        "type": "object",
+        "required": [
+          "hero_title",
+          "hero_desc",
+          "news_title",
+          "news_desc",
+          "csr_title",
+          "csr_desc",
+          "hero_title_en",
+          "hero_desc_en",
+          "news_title_en",
+          "news_desc_en",
+          "csr_title_en",
+          "csr_desc_en"
+        ],
+        "properties": {
+          "hero_bg": {
+            "type": "string",
+            "format": "binary"
+          },
+          "image_status": {
+            "type": "string",
+            "enum": ["keep", "change"]
+          },
+          "hero_title": { "type": "string" },
+          "hero_desc": { "type": "string" },
+          "news_title": { "type": "string" },
+          "news_desc": { "type": "string" },
+          "csr_title": { "type": "string" },
+          "csr_desc": { "type": "string" },
+          "hero_title_en": { "type": "string" },
+          "hero_desc_en": { "type": "string" },
+          "news_title_en": { "type": "string" },
+          "news_desc_en": { "type": "string" },
+          "csr_title_en": { "type": "string" },
+          "csr_desc_en": { "type": "string" }
+        }
+      },
+      "NewsPageUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NewsPageCreate"
+          },
+          {
+            "type": "object",
+            "required": ["image_status"],
+            "properties": {
+              "image_status": {
+                "type": "string",
+                "enum": ["keep", "change"]
+              }
+            }
+          }
+        ]
+      },
+      "InvestorPageCreate": {
+        "type": "object",
+        "required": [
+          "hero_title",
+          "hero_desc",
+          "hero_badge",
+          "stakeholders_title",
+          "stakeholders_desc",
+          "stakeholders_badge",
+          "report_title",
+          "report_desc",
+          "report_badge",
+          "hero_title_en",
+          "hero_desc_en",
+          "hero_badge_en",
+          "stakeholders_title_en",
+          "stakeholders_desc_en",
+          "stakeholders_badge_en",
+          "report_title_en",
+          "report_desc_en",
+          "report_badge_en"
+        ],
+        "properties": {
+          "hero_bg": {
+            "type": "string",
+            "format": "binary"
+          },
+          "image_status": {
+            "type": "string",
+            "enum": ["keep", "change"]
+          },
+          "hero_title": { "type": "string" },
+          "hero_desc": { "type": "string" },
+          "hero_badge": { "type": "string" },
+          "stakeholders_title": { "type": "string" },
+          "stakeholders_desc": { "type": "string" },
+          "stakeholders_badge": { "type": "string" },
+          "report_title": { "type": "string" },
+          "report_desc": { "type": "string" },
+          "report_badge": { "type": "string" },
+          "hero_title_en": { "type": "string" },
+          "hero_desc_en": { "type": "string" },
+          "hero_badge_en": { "type": "string" },
+          "stakeholders_title_en": { "type": "string" },
+          "stakeholders_desc_en": { "type": "string" },
+          "stakeholders_badge_en": { "type": "string" },
+          "report_title_en": { "type": "string" },
+          "report_desc_en": { "type": "string" },
+          "report_badge_en": { "type": "string" }
+        }
+      },
+      "InvestorPageUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InvestorPageCreate"
+          },
+          {
+            "type": "object",
+            "required": ["image_status"],
+            "properties": {
+              "image_status": {
+                "type": "string",
+                "enum": ["keep", "change"]
+              }
+            }
+          }
+        ]
+      },
+      "ServicePageInput": {
+        "type": "object",
+        "required": [
+          "hero_title",
+          "hero_desc",
+          "used_car_gallery_title",
+          "used_car_gallery_desc",
+          "hero_title_en",
+          "hero_desc_en",
+          "used_car_gallery_title_en",
+          "used_car_gallery_desc_en"
+        ],
+        "properties": {
+          "hero_bg": {
+            "type": "string",
+            "format": "binary"
+          },
+          "hero_title": { "type": "string" },
+          "hero_desc": { "type": "string" },
+          "hero_badge": { "type": "string" },
+          "used_car_gallery_title": { "type": "string" },
+          "used_car_gallery_desc": { "type": "string" },
+          "used_car_gallery_badge": { "type": "string" },
+          "hero_title_en": { "type": "string" },
+          "hero_desc_en": { "type": "string" },
+          "hero_badge_en": { "type": "string" },
+          "used_car_gallery_title_en": { "type": "string" },
+          "used_car_gallery_desc_en": { "type": "string" },
+          "used_car_gallery_badge_en": { "type": "string" }
+        }
+      },
+      "GovernanceItemInput": {
+        "type": "object",
+        "required": ["name", "position", "position_desc"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "position": { "type": "string", "enum": ["BOD", "BOC"] },
+          "position_desc": { "type": "string" },
+          "photo_index": { "type": "integer" }
+        }
+      },
+      "CompanyStructureItemInput": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "icon_index": { "type": "integer" }
+        }
+      },
+      "AboutUsInput": {
+        "type": "object",
+        "required": [
+          "hero_title",
+          "hero_desc",
+          "hero_badge",
+          "vision_title",
+          "vision_desc",
+          "vision_badge",
+          "mission_title",
+          "mission_desc",
+          "mission_badge",
+          "history_title",
+          "history_desc",
+          "history_badge",
+          "company_structure_title",
+          "company_structure_desc",
+          "company_structure_badge",
+          "boc_title",
+          "boc_desc",
+          "boc_badge",
+          "bod_title",
+          "bod_desc",
+          "bod_badge",
+          "hero_title_en",
+          "hero_desc_en",
+          "hero_badge_en",
+          "vision_title_en",
+          "vision_desc_en",
+          "vision_badge_en",
+          "vision_quote_en",
+          "mission_title_en",
+          "mission_desc_en",
+          "mission_badge_en",
+          "mission_quote_en",
+          "history_title_en",
+          "history_desc_en",
+          "history_badge_en",
+          "company_structure_title_en",
+          "company_structure_desc_en",
+          "company_structure_badge_en",
+          "boc_title_en",
+          "boc_desc_en",
+          "boc_badge_en",
+          "bod_title_en",
+          "bod_desc_en",
+          "bod_badge_en",
+          "vision_list",
+          "mission_list",
+          "vision_list_en",
+          "mission_list_en",
+          "governance_list",
+          "company_structure_list"
+        ],
+        "properties": {
+          "hero_bg": { "type": "string", "format": "binary" },
+          "vision_image_parent": { "type": "string", "format": "binary" },
+          "vision_image_child": { "type": "string", "format": "binary" },
+          "mission_image_parent": { "type": "string", "format": "binary" },
+          "mission_image_child": { "type": "string", "format": "binary" },
+          "history_image_parent": { "type": "string", "format": "binary" },
+          "history_image_child": { "type": "string", "format": "binary" },
+          "governance_photos": {
+            "type": "array",
+            "items": { "type": "string", "format": "binary" }
+          },
+          "company_structure_icons": {
+            "type": "array",
+            "items": { "type": "string", "format": "binary" }
+          },
+          "hero_title": { "type": "string" },
+          "hero_desc": { "type": "string" },
+          "hero_badge": { "type": "string" },
+          "vision_title": { "type": "string" },
+          "vision_desc": { "type": "string" },
+          "vision_badge": { "type": "string" },
+          "vision_quote": { "type": "string" },
+          "vision_list": {
+            "type": "string",
+            "description": "JSON array string, for example `[\"Point 1\",\"Point 2\"]`."
+          },
+          "mission_title": { "type": "string" },
+          "mission_desc": { "type": "string" },
+          "mission_badge": { "type": "string" },
+          "mission_quote": { "type": "string" },
+          "mission_list": {
+            "type": "string",
+            "description": "JSON array string."
+          },
+          "history_title": { "type": "string" },
+          "history_desc": { "type": "string" },
+          "history_badge": { "type": "string" },
+          "company_structure_title": { "type": "string" },
+          "company_structure_desc": { "type": "string" },
+          "company_structure_badge": { "type": "string" },
+          "boc_title": { "type": "string" },
+          "boc_desc": { "type": "string" },
+          "boc_badge": { "type": "string" },
+          "bod_title": { "type": "string" },
+          "bod_desc": { "type": "string" },
+          "bod_badge": { "type": "string" },
+          "hero_title_en": { "type": "string" },
+          "hero_desc_en": { "type": "string" },
+          "hero_badge_en": { "type": "string" },
+          "vision_title_en": { "type": "string" },
+          "vision_desc_en": { "type": "string" },
+          "vision_badge_en": { "type": "string" },
+          "vision_quote_en": { "type": "string" },
+          "vision_list_en": {
+            "type": "string",
+            "description": "JSON array string."
+          },
+          "mission_title_en": { "type": "string" },
+          "mission_desc_en": { "type": "string" },
+          "mission_badge_en": { "type": "string" },
+          "mission_quote_en": { "type": "string" },
+          "mission_list_en": {
+            "type": "string",
+            "description": "JSON array string."
+          },
+          "history_title_en": { "type": "string" },
+          "history_desc_en": { "type": "string" },
+          "history_badge_en": { "type": "string" },
+          "company_structure_title_en": { "type": "string" },
+          "company_structure_desc_en": { "type": "string" },
+          "company_structure_badge_en": { "type": "string" },
+          "boc_title_en": { "type": "string" },
+          "boc_desc_en": { "type": "string" },
+          "boc_badge_en": { "type": "string" },
+          "bod_title_en": { "type": "string" },
+          "bod_desc_en": { "type": "string" },
+          "bod_badge_en": { "type": "string" },
+          "governance_list": {
+            "type": "string",
+            "description": "JSON array string of `GovernanceItemInput` objects."
+          },
+          "company_structure_list": {
+            "type": "string",
+            "description": "JSON array string of `CompanyStructureItemInput` objects."
+          }
+        }
+      },
+      "ServiceItemInput": {
+        "type": "object",
+        "required": [
+          "title",
+          "desc",
+          "desc_sort",
+          "location",
+          "contact",
+          "email",
+          "title_en",
+          "desc_en",
+          "desc_sort_en",
+          "location_en"
+        ],
+        "properties": {
+          "bg_image": {
+            "type": "string",
+            "format": "binary"
+          },
+          "title": { "type": "string" },
+          "desc": { "type": "string" },
+          "desc_sort": { "type": "string" },
+          "badge": { "type": "string" },
+          "quote": { "type": "string" },
+          "location": { "type": "string" },
+          "contact": {
+            "type": "string",
+            "description": "JSON array string, for example `[\"0812...\",\"021...\"]`."
+          },
+          "email": {
+            "type": "string",
+            "description": "JSON array string of email addresses."
+          },
+          "title_en": { "type": "string" },
+          "desc_en": { "type": "string" },
+          "desc_sort_en": { "type": "string" },
+          "badge_en": { "type": "string" },
+          "quote_en": { "type": "string" },
+          "location_en": { "type": "string" },
+          "order": { "type": "integer" },
+          "image_index": { "type": "integer" },
+          "id": { "type": "string", "format": "uuid" },
+          "id_en": { "type": "string", "format": "uuid" }
+        }
+      },
+      "CarGalleryInput": {
+        "type": "object",
+        "required": ["title", "desc", "title_en", "desc_en"],
+        "properties": {
+          "car_image": {
+            "type": "string",
+            "format": "binary"
+          },
+          "title": { "type": "string" },
+          "desc": { "type": "string" },
+          "title_en": { "type": "string" },
+          "desc_en": { "type": "string" }
+        }
+      },
+      "NewsNewsCreate": {
+        "type": "object",
+        "required": ["title", "content", "title_en", "content_en"],
+        "properties": {
+          "image": { "type": "string", "format": "binary" },
+          "author_image": { "type": "string", "format": "binary" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "content": { "type": "string" },
+          "title_en": { "type": "string" },
+          "description_en": { "type": "string" },
+          "content_en": { "type": "string" },
+          "author": { "type": "string" },
+          "isPublished": { "type": "boolean" }
+        }
+      },
+      "NewsNewsUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NewsNewsCreate"
+          },
+          {
+            "type": "object",
+            "required": ["image_status"],
+            "properties": {
+              "image_status": {
+                "type": "string",
+                "enum": ["keep", "change"]
+              },
+              "author_image_status": {
+                "type": "string",
+                "enum": ["keep", "change", "remove"]
+              }
+            }
+          }
+        ]
+      },
+      "NewsCSRCreate": {
+        "type": "object",
+        "required": ["title", "content", "title_en", "content_en"],
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": { "type": "string", "format": "binary" },
+            "maxItems": 10
+          },
+          "author_image": { "type": "string", "format": "binary" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "content": { "type": "string" },
+          "title_en": { "type": "string" },
+          "description_en": { "type": "string" },
+          "content_en": { "type": "string" },
+          "author": { "type": "string" },
+          "isPublished": { "type": "boolean" },
+          "images_description_id": {
+            "type": "string",
+            "description": "JSON array string aligned with uploaded `images`."
+          },
+          "images_description_en": {
+            "type": "string",
+            "description": "JSON array string aligned with uploaded `images`."
+          }
+        }
+      },
+      "NewsCSRUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NewsCSRCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "author_image_status": {
+                "type": "string",
+                "enum": ["keep", "change", "remove"]
+              },
+              "deleted_image_ids": {
+                "type": "string",
+                "description": "JSON array string containing image IDs to remove."
+              }
+            }
+          }
+        ]
+      },
+      "PartnerInput": {
+        "type": "object",
+        "required": ["name", "category"],
+        "properties": {
+          "logo_image": {
+            "type": "string",
+            "format": "binary"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["INSURANCE", "FUNDING"]
+          }
+        }
+      },
+      "SharesInput": {
+        "type": "object",
+        "required": ["category", "value"],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "ReportCategoryInput": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ReportCreate": {
+        "type": "object",
+        "required": ["publish_at", "reportCategoryId", "file_url"],
+        "properties": {
+          "title_id": { "type": "string" },
+          "title_en": { "type": "string" },
+          "description_id": { "type": "string" },
+          "description_en": { "type": "string" },
+          "publish_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "is_publish": {
+            "type": "boolean"
+          },
+          "reportCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "file_status": {
+            "type": "string",
+            "enum": ["keep", "change"]
+          },
+          "file_url": {
+            "type": "string",
+            "format": "binary",
+            "description": "PDF, Word, or Excel file."
+          },
+          "news_author": { "type": "string" },
+          "news_image": {
+            "type": "string",
+            "format": "binary"
+          },
+          "news_author_image": {
+            "type": "string",
+            "format": "binary"
+          },
+          "news_content_id": { "type": "string" },
+          "news_content_en": { "type": "string" }
+        }
+      },
+      "ReportUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ReportCreate"
+          },
+          {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "file_status": {
+                "type": "string",
+                "enum": ["keep", "change"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

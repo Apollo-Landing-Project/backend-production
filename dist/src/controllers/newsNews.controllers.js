@@ -30,8 +30,9 @@ export class NewsNewsControllers {
             const files = req.files;
             const imageFile = files?.image?.[0];
             const authorImageFile = files?.author_image?.[0];
+            const reportFile = files?.report_file?.[0];
             const validatedBody = newsNewsCreateSchema.parse(req.body);
-            const data = await NewsNewsServices.create(validatedBody, imageFile, authorImageFile);
+            const data = await NewsNewsServices.create(validatedBody, imageFile, authorImageFile, reportFile);
             await RevalidatedServices.revalidated("news");
             await RevalidatedServices.revalidated("home");
             responseSuccess(res, 201, "News created successfully", data);
@@ -48,11 +49,12 @@ export class NewsNewsControllers {
             const files = req.files;
             const imageFile = files?.image?.[0];
             const authorImageFile = files?.author_image?.[0];
+            const reportFile = files?.report_file?.[0];
             const validatedBody = newsNewsUpdateSchema.parse(req.body);
             if (validatedBody.image_status === "change" && !imageFile) {
                 throw new Error("Image is required when status is 'change'");
             }
-            const data = await NewsNewsServices.update(id, validatedBody, imageFile, authorImageFile);
+            const data = await NewsNewsServices.update(id, validatedBody, imageFile, authorImageFile, reportFile);
             await RevalidatedServices.revalidated("news");
             await RevalidatedServices.revalidated("home");
             responseSuccess(res, 200, "News updated successfully", data);

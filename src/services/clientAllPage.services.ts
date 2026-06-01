@@ -1,7 +1,41 @@
-import { title } from "node:process";
 import { db } from "../lib/prisma.js";
 
+const buildReportDownloadUrl = (reportId?: string | null) =>
+	reportId ? `${process.env.HOST_URL || "http://localhost:5050/api"}/client/download/${reportId}` : null;
+const normalizeTitle = (value?: string | null) => {
+	if (typeof value !== "string") return null;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+};
+
 export class ClientAllService {
+	private static async resolveLinkedReport(options: {
+		reportId?: string | null | undefined;
+		titleId?: string | null | undefined;
+		titleEn?: string | null | undefined;
+	}) {
+		if (options.reportId) {
+			const directReport = await db.report.findUnique({
+				where: { id: options.reportId },
+				select: { id: true, file_url: true },
+			});
+			if (directReport) return directReport;
+		}
+
+		const titles = [normalizeTitle(options.titleId), normalizeTitle(options.titleEn)].filter(
+			(value): value is string => Boolean(value),
+		);
+
+		if (titles.length === 0) return null;
+
+		return await db.report.findFirst({
+			where: {
+				OR: titles.flatMap((title) => [{ title_id: title }, { title_en: title }]),
+			},
+			select: { id: true, file_url: true },
+		});
+	}
+
 	static async getMetadata(lang: string, destination: string) {
 		const metadata = await db.metadata.findUnique({
 			where: {
@@ -90,6 +124,32 @@ export class ClientAllService {
 
 		if (!content) throw new Error("Home Page Content not found");
 
+		const homeNewsItems = await Promise.all(
+			newsItems.map(async (item) => {
+				const linkedReport = await this.resolveLinkedReport({
+					reportId: item.report_id,
+					titleId: item.newsNewsId?.title,
+					titleEn: item.newsNewsEn?.title,
+				});
+
+				return {
+					id: item.id,
+					title:
+						lang === "en" ? item.newsNewsEn?.title : item.newsNewsId?.title,
+					desc:
+						lang === "en" ?
+							item.newsNewsEn?.description
+						:	item.newsNewsId?.description,
+					publishedAt: item.publishedAt,
+					image: item.image,
+					has_report: !!linkedReport,
+					report_id: linkedReport?.id ?? null,
+					download_url: buildReportDownloadUrl(linkedReport?.id),
+					file_url: linkedReport?.file_url ?? null,
+				};
+			}),
+		);
+
 		return {
 			id: home.id,
 
@@ -114,23 +174,6 @@ export class ClientAllService {
 					title: lang === "en" ? item.serviceEn?.title : item.serviceId?.title,
 					desc: lang === "en" ? item.serviceEn?.desc : item.serviceId?.desc,
 					image: item.bg_image,
-				})),
-			},
-
-			news: {
-				badge: content.news_badge,
-				title: content.news_title,
-				desc: content.news_desc,
-				newsItems: newsItems.map((item) => ({
-					id: item.id,
-					title:
-						lang === "en" ? item.newsNewsEn?.title : item.newsNewsId?.title,
-					desc:
-						lang === "en" ?
-							item.newsNewsEn?.description
-						:	item.newsNewsId?.description,
-					publishedAt: item.publishedAt,
-					image: item.image,
 				})),
 			},
 
@@ -379,18 +422,30 @@ export class ClientAllService {
 			},
 		});
 
-		const newsItems = newsNewsList.map((item) => {
-			const content = lang === "en" ? item.newsNewsEn : item.newsNewsId;
-			return {
-				id: item.id,
-				title: content?.title,
-				description: content?.description,
-				image: item.image,
-				author: item.author,
-				authorImage: item.author_image,
-				publishedAt: item.publishedAt,
-			};
-		});
+		const newsItems = await Promise.all(
+			newsNewsList.map(async (item) => {
+				const content = lang === "en" ? item.newsNewsEn : item.newsNewsId;
+				const linkedReport = await this.resolveLinkedReport({
+					reportId: item.report_id,
+					titleId: item.newsNewsId?.title,
+					titleEn: item.newsNewsEn?.title,
+				});
+
+				return {
+					id: item.id,
+					title: content?.title,
+					description: content?.description,
+					image: item.image,
+					author: item.author,
+					authorImage: item.author_image,
+					publishedAt: item.publishedAt,
+					has_report: !!linkedReport,
+					report_id: linkedReport?.id ?? null,
+					download_url: buildReportDownloadUrl(linkedReport?.id),
+					file_url: linkedReport?.file_url ?? null,
+				};
+			}),
+		);
 
 		// 3. Get published NewsCSR
 		const csrList = await db.newsCSR.findMany({
@@ -430,18 +485,6 @@ export class ClientAllService {
 				background: newsPage.hero_bg,
 			},
 
-			newsSection: {
-				badge: pageContent.news_badge,
-				title: pageContent.news_title,
-				desc: pageContent.news_desc,
-			},
-
-			csrSection: {
-				badge: pageContent.csr_badge,
-				title: pageContent.csr_title,
-				desc: pageContent.csr_desc,
-			},
-
 			news: newsItems,
 			csr: csrItems,
 		};
@@ -461,6 +504,12 @@ export class ClientAllService {
 		const content = lang === "en" ? news.newsNewsEn : news.newsNewsId;
 		if (!content) throw new Error("News Content not found");
 
+		const linkedReport = await this.resolveLinkedReport({
+			reportId: news.report_id,
+			titleId: news.newsNewsId?.title,
+			titleEn: news.newsNewsEn?.title,
+		});
+
 		return {
 			id: news.id,
 			title: content.title,
@@ -470,6 +519,11 @@ export class ClientAllService {
 			author: news.author,
 			authorImage: news.author_image,
 			publishedAt: news.publishedAt,
+			has_report: !!linkedReport,
+			report_id: linkedReport?.id ?? null,
+			download_url: buildReportDownloadUrl(linkedReport?.id),
+			attachment: linkedReport?.file_url ?? buildReportDownloadUrl(linkedReport?.id),
+			file_url: linkedReport?.file_url ?? null,
 		};
 	}
 
@@ -524,17 +578,18 @@ export class ClientAllService {
 		const reports = await db.report.findMany({
 			where: {
 				is_publish: true,
+				news: { none: {} }, // Only reports WITHOUT news
 			},
 			orderBy: {
 				publish_at: "desc",
 			},
 			include: {
 				reportCategory: true,
-                news: {
-                    select: {
-                        id: true,
-                    }
-                }
+				news: {
+					select: {
+						id: true,
+					},
+				},
 			},
 		});
 

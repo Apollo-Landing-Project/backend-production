@@ -8,12 +8,14 @@ newsNewsRoutes.post("/upload-content-image", uploadImage.single("content_image")
 newsNewsRoutes.post("/", uploadImage.fields([
     { name: "image", maxCount: 1 },
     { name: "author_image", maxCount: 1 },
+    { name: "report_file", maxCount: 1 },
 ]), NewsNewsControllers.create);
 newsNewsRoutes.get("/", NewsNewsControllers.getAll);
 newsNewsRoutes.get("/:id", NewsNewsControllers.getById);
 newsNewsRoutes.put("/:id", uploadImage.fields([
     { name: "image", maxCount: 1 },
     { name: "author_image", maxCount: 1 },
+    { name: "report_file", maxCount: 1 },
 ]), NewsNewsControllers.update);
 newsNewsRoutes.delete("/:id", NewsNewsControllers.delete);
 newsNewsRoutes.patch("/:id/publish", NewsNewsControllers.togglePublish);

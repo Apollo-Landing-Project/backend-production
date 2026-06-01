@@ -485,6 +485,7 @@ export const ReportScalarFieldEnum = {
     description_id: 'description_id',
     description_en: 'description_en',
     file_url: 'file_url',
+    original_filename: 'original_filename',
     publish_at: 'publish_at',
     is_publish: 'is_publish',
     reportCategoryId: 'reportCategoryId',

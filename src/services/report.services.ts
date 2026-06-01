@@ -8,6 +8,11 @@ import type {
 import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 
 const DEFAULT_DOWNLOAD_FILENAME = "report.pdf";
+const normalizeTitle = (value?: string | null) => {
+	if (typeof value !== "string") return null;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+};
 
 function getFilenameFromUrl(fileUrl?: string | null): string | null {
 	if (!fileUrl) return null;
@@ -36,6 +41,8 @@ export class ReportServices {
 		newsImage?: Express.Multer.File,
 		newsAuthorImage?: Express.Multer.File,
 	) {
+		const titleId = normalizeTitle(data.title_id);
+		const titleEn = normalizeTitle(data.title_en);
 		let fileUrl = null;
 		if (file) {
 			fileUrl = `${envConfig.host_url}/files/${file.filename}`;
@@ -51,10 +58,35 @@ export class ReportServices {
 			newsAuthorImageUrl = `${envConfig.host_url}/files/${newsAuthorImage.filename}`;
 		}
 
+		// Check for duplicate titles
+		if (titleId) {
+			const existingId = await db.report.findFirst({
+				where: { title_id: titleId },
+			});
+			if (existingId) throw new Error("Title (ID) already exists in reports");
+
+			const existingNewsId = await db.newsNewsId.findFirst({
+				where: { title: titleId },
+			});
+			if (existingNewsId) throw new Error("Title (ID) already exists in news");
+		}
+
+		if (titleEn) {
+			const existingEn = await db.report.findFirst({
+				where: { title_en: titleEn },
+			});
+			if (existingEn) throw new Error("Title (EN) already exists in reports");
+
+			const existingNewsEn = await db.newsNewsEn.findFirst({
+				where: { title: titleEn },
+			});
+			if (existingNewsEn) throw new Error("Title (EN) already exists in news");
+		}
+
 		const report = await db.report.create({
 			data: {
-				title_id: data.title_id ?? null,
-				title_en: data.title_en ?? null,
+				title_id: titleId,
+				title_en: titleEn,
 				description_id: data.description_id ?? null,
 				description_en: data.description_en ?? null,
 				publish_at: data.publish_at,
@@ -106,6 +138,7 @@ export class ReportServices {
 			where: whereClause,
 			include: {
 				reportCategory: true,
+				news: true,
 			},
 			orderBy: {
 				publish_at: "desc",
@@ -137,6 +170,10 @@ export class ReportServices {
 		newsImage?: Express.Multer.File,
 		newsAuthorImage?: Express.Multer.File,
 	) {
+		const titleId =
+			data.title_id === undefined ? undefined : normalizeTitle(data.title_id);
+		const titleEn =
+			data.title_en === undefined ? undefined : normalizeTitle(data.title_en);
 		const existing = await db.report.findUnique({
 			where: { id },
 			include: { news: true },
@@ -178,11 +215,48 @@ export class ReportServices {
 			newsAuthorImageUrl = `${envConfig.host_url}/files/${newsAuthorImage.filename}`;
 		}
 
+		// Check for duplicate titles (excluding current report)
+		if (titleId) {
+			const duplicateId = await db.report.findFirst({
+				where: {
+					title_id: titleId,
+					NOT: { id: id },
+				},
+			});
+			if (duplicateId) throw new Error("Title (ID) already exists in reports");
+
+			const duplicateNewsId = await db.newsNewsId.findFirst({
+				where: {
+					title: titleId,
+					newsNewsId: { not: existing.news[0]?.id ?? "" },
+				},
+			});
+			if (duplicateNewsId) throw new Error("Title (ID) already exists in news");
+		}
+
+		if (titleEn) {
+			const duplicateEn = await db.report.findFirst({
+				where: {
+					title_en: titleEn,
+					NOT: { id: id },
+				},
+			});
+			if (duplicateEn) throw new Error("Title (EN) already exists in reports");
+
+			const duplicateNewsEn = await db.newsNewsEn.findFirst({
+				where: {
+					title: titleEn,
+					newsNewsId: { not: existing.news[0]?.id ?? "" },
+				},
+			});
+			if (duplicateNewsEn) throw new Error("Title (EN) already exists in news");
+		}
+
 		const report = await db.report.update({
 			where: { id },
 			data: {
-				title_id: data.title_id ?? undefined,
-				title_en: data.title_en ?? undefined,
+				title_id: titleId,
+				title_en: titleEn,
 				description_id: data.description_id ?? undefined,
 				description_en: data.description_en ?? undefined,
 				publish_at: data.publish_at ?? undefined,
@@ -206,7 +280,7 @@ export class ReportServices {
 					publishedAt: data.publish_at ?? undefined,
 					newsNewsId: {
 						update: {
-							...(data.title_id !== undefined && { title: data.title_id }),
+							...(titleId !== undefined && { title: titleId }),
 							...(data.description_id !== undefined && {
 								description: data.description_id,
 							}),
@@ -217,7 +291,7 @@ export class ReportServices {
 					},
 					newsNewsEn: {
 						update: {
-							...(data.title_en !== undefined && { title: data.title_en }),
+							...(titleEn !== undefined && { title: titleEn }),
 							...(data.description_en !== undefined && {
 								description: data.description_en,
 							}),
@@ -245,14 +319,14 @@ export class ReportServices {
 					report_id: report.id,
 					newsNewsId: {
 						create: {
-							title: data.title_id ?? report.title_id,
+							title: titleId ?? report.title_id,
 							description: data.description_id ?? report.description_id,
 							content: data.news_content_id ?? null,
 						},
 					},
 					newsNewsEn: {
 						create: {
-							title: data.title_en ?? report.title_en,
+							title: titleEn ?? report.title_en,
 							description: data.description_en ?? report.description_en,
 							content: data.news_content_en ?? null,
 						},
@@ -277,6 +351,9 @@ export class ReportServices {
 				where: { report_id: id },
 			});
 			if (news) {
+				if (news.image) deleteWebDavFile(news.image, "images");
+				if (news.author_image) deleteWebDavFile(news.author_image, "images");
+				
 				await tx.newsNewsEn.delete({ where: { newsNewsId: news.id } });
 				await tx.newsNewsId.delete({ where: { newsNewsId: news.id } });
 				await tx.newsNews.delete({

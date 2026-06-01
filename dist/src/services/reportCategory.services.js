@@ -1,4 +1,14 @@
 import { db } from "../lib/prisma.js";
+const DEFAULT_REPORT_CATEGORIES = [
+    {
+        name: "Annual Report",
+        description: "Bootstrap category for local testing.",
+    },
+    {
+        name: "Financial Statements",
+        description: "Bootstrap category for local testing.",
+    },
+];
 export class ReportCategoryServices {
     static async create(data) {
         return await db.reportCategory.create({
@@ -9,7 +19,14 @@ export class ReportCategoryServices {
         });
     }
     static async getAll() {
+        await db.reportCategory.createMany({
+            data: DEFAULT_REPORT_CATEGORIES,
+            skipDuplicates: true,
+        });
         return await db.reportCategory.findMany({
+            orderBy: {
+                name: "asc",
+            },
             include: {
                 _count: {
                     select: { reports: true },

@@ -11,5 +11,8 @@ export declare class ReportControllers {
     static delete(req: Request<{
         id: string;
     }>, res: Response): Promise<void>;
+    static download(req: Request<{
+        reportId: string;
+    }>, res: Response): Promise<void>;
 }
 //# sourceMappingURL=report.controllers.d.ts.map

@@ -7,8 +7,10 @@ async function ensureMetadata() {
 				destination: "homepage",
 				title_id: "Beranda",
 				title_en: "Home",
-				description_id: "Halaman utama Apollo Global Interactive untuk pengembangan lokal.",
-				description_en: "Apollo Global Interactive home page for local development.",
+				description_id:
+					"Halaman utama Apollo Global Interactive untuk pengembangan lokal.",
+				description_en:
+					"Apollo Global Interactive home page for local development.",
 			},
 			{
 				destination: "aboutuspage",
@@ -62,13 +64,13 @@ async function ensureHomePage() {
 				create: {
 					about_us_badge: "Tentang Kami",
 					about_us_title: "Solusi mobilitas untuk lingkungan lokal",
-					about_us_desc: "Konten bootstrap lokal untuk menguji landing page dan CMS.",
+					about_us_desc:
+						"Konten bootstrap lokal untuk menguji landing page dan CMS.",
 					services_badge: "Layanan",
 					services_title: "Layanan Apollo",
 					services_desc: "Data lokal untuk pengujian.",
 					news_badge: "Berita",
 					news_title: "Kabar Terbaru",
-					news_desc: "Belum ada berita lokal.",
 					partners_badge: "Mitra",
 					partners_title: "Mitra Apollo",
 					partners_desc: "Belum ada mitra lokal.",
@@ -80,7 +82,8 @@ async function ensureHomePage() {
 				create: {
 					about_us_badge: "About Us",
 					about_us_title: "Mobility solutions for local development",
-					about_us_desc: "Local bootstrap content to test the landing page and CMS.",
+					about_us_desc:
+						"Local bootstrap content to test the landing page and CMS.",
 					services_badge: "Services",
 					services_title: "Apollo Services",
 					services_desc: "Local data for development testing.",
@@ -223,7 +226,6 @@ async function ensureNewsPage() {
 					hero_desc: "Halaman berita lokal untuk pengujian.",
 					news_badge: "Berita",
 					news_title: "Berita Terbaru",
-					news_desc: "Belum ada berita lokal.",
 					csr_badge: "CSR",
 					csr_title: "CSR",
 					csr_desc: "Belum ada CSR lokal.",
@@ -298,6 +300,10 @@ async function ensureReportCategory() {
 		data: [
 			{
 				name: "Annual Report",
+				description: "Bootstrap category for local testing.",
+			},
+			{
+				name: "Financial Statements",
 				description: "Bootstrap category for local testing.",
 			},
 		],

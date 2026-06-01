@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ClientAllController } from "../controllers/clientAllPage.controllers.js";
+import { ReportControllers } from "../controllers/report.controllers.js";
 export const clientAllPage = Router();
 // Home Page Routes
 clientAllPage.get("/home", ClientAllController.getHomePage);
@@ -13,4 +14,5 @@ clientAllPage.get("/news/csr/:id", ClientAllController.getNewsCSRDetail);
 clientAllPage.get("/news/article/:id", ClientAllController.getNewsDetail);
 // Investor Page Routes
 clientAllPage.get("/investor", ClientAllController.getInvestorRelationPage);
+clientAllPage.get("/download/:reportId", ReportControllers.download);
 //# sourceMappingURL=clientAllPage.route.js.map

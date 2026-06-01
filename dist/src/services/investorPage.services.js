@@ -2,11 +2,12 @@ import { envConfig } from "../config/env.config.js";
 import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 export class InvestorPageServices {
     static async create(data, file_image) {
         const newInvestorPage = await db.investorPage.create({
             data: {
-                hero_bg: `${envConfig.host_url}/storage/images/${file_image.filename}`,
+                hero_bg: `${envConfig.host_url}/images/${file_image.filename}`,
                 inverstorPageId: {
                     create: {
                         hero_title: data.hero_title,
@@ -72,11 +73,9 @@ export class InvestorPageServices {
         if (!data)
             throw new Error("Not found");
         // Hapus file fisik
-        const filename = data.hero_bg?.split("/").pop();
+        const filename = data.hero_bg;
         if (filename) {
-            const filePath = path.join("/apollo/storage/images", filename);
-            if (fs.existsSync(filePath))
-                fs.unlinkSync(filePath);
+            deleteWebDavFile(filename, "images");
         }
         return await db.$transaction(async (tx) => {
             await tx.investorPageId.delete({ where: { investorPageId: id } });
@@ -92,15 +91,10 @@ export class InvestorPageServices {
         if (data.image_status === "change") {
             const oldUrl = existing.hero_bg;
             if (oldUrl) {
-                const oldFilename = oldUrl.split("/").pop();
-                if (oldFilename) {
-                    const oldPath = path.join("/apollo/storage/images", oldFilename);
-                    if (fs.existsSync(oldPath))
-                        fs.unlinkSync(oldPath);
-                }
+                deleteWebDavFile(oldUrl, "images");
             }
             if (file) {
-                newHeroBg = `${envConfig.host_url}/storage/images/${file.filename}`;
+                newHeroBg = `${envConfig.host_url}/images/${file.filename}`;
             }
         }
         return await db.investorPage.update({

@@ -1,4 +1,5 @@
 export declare class ClientAllService {
+    private static resolveLinkedReport;
     static getMetadata(lang: string, destination: string): Promise<{
         title: string | null;
         description: string | null;
@@ -28,18 +29,6 @@ export declare class ClientAllService {
                 id: string;
                 title: string | null | undefined;
                 desc: string | null | undefined;
-                image: string | null;
-            }[];
-        };
-        news: {
-            badge: string | null;
-            title: string | null;
-            desc: string | null;
-            newsItems: {
-                id: string;
-                title: string | null | undefined;
-                desc: string | null | undefined;
-                publishedAt: Date;
                 image: string | null;
             }[];
         };
@@ -173,16 +162,6 @@ export declare class ClientAllService {
             desc: string | null;
             background: string | null;
         };
-        newsSection: {
-            badge: string | null;
-            title: string | null;
-            desc: string | null;
-        };
-        csrSection: {
-            badge: string | null;
-            title: string | null;
-            desc: string | null;
-        };
         news: {
             id: string;
             title: string | null | undefined;
@@ -191,6 +170,10 @@ export declare class ClientAllService {
             author: string | null;
             authorImage: string | null;
             publishedAt: Date;
+            has_report: boolean;
+            report_id: string | null;
+            download_url: string | null;
+            file_url: string | null;
         }[];
         csr: {
             id: string;
@@ -215,6 +198,11 @@ export declare class ClientAllService {
         author: string | null;
         authorImage: string | null;
         publishedAt: Date;
+        has_report: boolean;
+        report_id: string | null;
+        download_url: string | null;
+        attachment: string | null;
+        file_url: string | null;
     }>;
     static getNewsCSRDetail(id: string, lang: string): Promise<{
         id: string;
@@ -259,6 +247,7 @@ export declare class ClientAllService {
                 title: string | null;
                 description: string | null;
                 file_url: string | null;
+                original_filename: string | null;
                 published_at: Date;
                 category: string;
             }[];

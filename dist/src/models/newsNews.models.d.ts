@@ -8,6 +8,7 @@ export declare const newsNewsCreateSchema: z.ZodObject<{
     content_en: z.ZodString;
     author: z.ZodOptional<z.ZodString>;
     isPublished: z.ZodDefault<z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodBoolean>>>;
+    reportCategoryId: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export declare const newsNewsUpdateSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -17,12 +18,18 @@ export declare const newsNewsUpdateSchema: z.ZodObject<{
     description_en: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     content_en: z.ZodOptional<z.ZodString>;
     author: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    isPublished: z.ZodOptional<z.ZodDefault<z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodBoolean>>>>;
+    reportCategoryId: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    isPublished: z.ZodOptional<z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodBoolean>>;
     image_status: z.ZodEnum<{
         keep: "keep";
         change: "change";
     }>;
     author_image_status: z.ZodDefault<z.ZodOptional<z.ZodEnum<{
+        keep: "keep";
+        change: "change";
+        remove: "remove";
+    }>>>;
+    report_status: z.ZodDefault<z.ZodOptional<z.ZodEnum<{
         keep: "keep";
         change: "change";
         remove: "remove";

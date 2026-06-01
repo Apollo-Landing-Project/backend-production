@@ -10,11 +10,27 @@ const fileFilter = (
 	file: Express.Multer.File,
 	cb: FileFilterCallback,
 ) => {
-	const allowed = ["image/jpeg", "image/png", "image/webp"];
-	if (allowed.includes(file.mimetype)) {
-		cb(null, true);
+	const allowedImages = ["image/jpeg", "image/png", "image/webp"];
+	const allowedDocs = [
+		"application/pdf",
+		"application/msword",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		"application/vnd.ms-excel",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	];
+
+	if (file.fieldname === "report_file") {
+		if (allowedDocs.includes(file.mimetype)) {
+			cb(null, true);
+		} else {
+			cb(new Error("Only PDF, Word, and Excel files are allowed for report_file"));
+		}
 	} else {
-		cb(new Error("Only JPG, PNG, WEBP images allowed"));
+		if (allowedImages.includes(file.mimetype)) {
+			cb(null, true);
+		} else {
+			cb(new Error("Only JPG, PNG, WEBP images allowed"));
+		}
 	}
 };
 
@@ -22,6 +38,6 @@ export const uploadImage = multer({
 	storage,
 	fileFilter,
 	limits: {
-		fileSize: 20 * 1024 * 1024, // 20MB
+		fileSize: 50 * 1024 * 1024, // 50MB
 	},
 });

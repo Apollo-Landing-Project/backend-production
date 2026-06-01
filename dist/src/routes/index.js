@@ -18,6 +18,13 @@ import { sharesRoutes } from "./shares.routes.js";
 import { reportCategoryRoutes } from "./reportCategory.routes.js";
 import { reportRoutes } from "./report.routes.js";
 export const router = Router();
+router.get("/", (_req, res) => {
+    responseSuccess(res, 200, "API router is available", {
+        health: "/health",
+        client: "/api/client",
+        auth: "/api/auth",
+    });
+});
 // CLIENT
 router.use("/client", clientAllPage);
 // CMS

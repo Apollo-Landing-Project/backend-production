@@ -37,6 +37,7 @@ export class NewsNewsControllers {
             };
             const imageFile = files?.image?.[0];
             const authorImageFile = files?.author_image?.[0];
+            const reportFile = files?.report_file?.[0];
 
             const validatedBody = newsNewsCreateSchema.parse(req.body);
 
@@ -44,6 +45,7 @@ export class NewsNewsControllers {
                 validatedBody,
                 imageFile,
                 authorImageFile,
+                reportFile,
             );
             await RevalidatedServices.revalidated("news")
             await RevalidatedServices.revalidated("home")
@@ -64,6 +66,7 @@ export class NewsNewsControllers {
             };
             const imageFile = files?.image?.[0];
             const authorImageFile = files?.author_image?.[0];
+            const reportFile = files?.report_file?.[0];
 
             const validatedBody = newsNewsUpdateSchema.parse(req.body);
 
@@ -76,6 +79,7 @@ export class NewsNewsControllers {
                 validatedBody,
                 imageFile,
                 authorImageFile,
+                reportFile,
             );
             
             await RevalidatedServices.revalidated("news")

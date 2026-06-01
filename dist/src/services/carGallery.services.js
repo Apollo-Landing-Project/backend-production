@@ -2,21 +2,8 @@ import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
-// --- HELPERS ---
-const deleteFile = (url) => {
-    if (!url)
-        return;
-    const filename = url.split("/").pop();
-    if (filename) {
-        const filePath = path.join(process.cwd(), "storage/images", filename);
-        if (fs.existsSync(filePath))
-            try {
-                fs.unlinkSync(filePath);
-            }
-            catch { }
-    }
-};
-const getFileUrl = (file) => file ? `${process.env.HOST_URL}/storage/images/${file.filename}` : null;
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
+const getFileUrl = (file) => file ? `${process.env.HOST_URL}/images/${file.filename}` : null;
 export class CarGalleryService {
     // --- GET ALL ---
     static async getAll() {
@@ -70,7 +57,7 @@ export class CarGalleryService {
         let car_image = existing.car_image;
         // Jika ada upload file baru
         if (file) {
-            deleteFile(existing.car_image); // Hapus file lama
+            deleteWebDavFile(existing.car_image, "images"); // Hapus file lama
             car_image = getFileUrl(file); // Set file baru
         }
         return await db.carGallery.update({
@@ -97,7 +84,7 @@ export class CarGalleryService {
     static async delete(id) {
         const existing = await this.getById(id);
         // Hapus File Fisik
-        deleteFile(existing.car_image);
+        deleteWebDavFile(existing.car_image, "images");
         // Hapus Database (Cascade delete anak-anaknya otomatis via Prisma relation)
         return await db.carGallery.delete({ where: { id } });
     }

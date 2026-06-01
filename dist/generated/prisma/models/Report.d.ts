@@ -17,6 +17,7 @@ export type ReportMinAggregateOutputType = {
     description_id: string | null;
     description_en: string | null;
     file_url: string | null;
+    original_filename: string | null;
     publish_at: Date | null;
     is_publish: boolean | null;
     reportCategoryId: string | null;
@@ -30,6 +31,7 @@ export type ReportMaxAggregateOutputType = {
     description_id: string | null;
     description_en: string | null;
     file_url: string | null;
+    original_filename: string | null;
     publish_at: Date | null;
     is_publish: boolean | null;
     reportCategoryId: string | null;
@@ -43,6 +45,7 @@ export type ReportCountAggregateOutputType = {
     description_id: number;
     description_en: number;
     file_url: number;
+    original_filename: number;
     publish_at: number;
     is_publish: number;
     reportCategoryId: number;
@@ -57,6 +60,7 @@ export type ReportMinAggregateInputType = {
     description_id?: true;
     description_en?: true;
     file_url?: true;
+    original_filename?: true;
     publish_at?: true;
     is_publish?: true;
     reportCategoryId?: true;
@@ -70,6 +74,7 @@ export type ReportMaxAggregateInputType = {
     description_id?: true;
     description_en?: true;
     file_url?: true;
+    original_filename?: true;
     publish_at?: true;
     is_publish?: true;
     reportCategoryId?: true;
@@ -83,6 +88,7 @@ export type ReportCountAggregateInputType = {
     description_id?: true;
     description_en?: true;
     file_url?: true;
+    original_filename?: true;
     publish_at?: true;
     is_publish?: true;
     reportCategoryId?: true;
@@ -159,6 +165,7 @@ export type ReportGroupByOutputType = {
     description_id: string | null;
     description_en: string | null;
     file_url: string | null;
+    original_filename: string | null;
     publish_at: Date;
     is_publish: boolean;
     reportCategoryId: string;
@@ -181,6 +188,7 @@ export type ReportWhereInput = {
     description_id?: Prisma.StringNullableFilter<"Report"> | string | null;
     description_en?: Prisma.StringNullableFilter<"Report"> | string | null;
     file_url?: Prisma.StringNullableFilter<"Report"> | string | null;
+    original_filename?: Prisma.StringNullableFilter<"Report"> | string | null;
     publish_at?: Prisma.DateTimeFilter<"Report"> | Date | string;
     is_publish?: Prisma.BoolFilter<"Report"> | boolean;
     reportCategoryId?: Prisma.StringFilter<"Report"> | string;
@@ -196,6 +204,7 @@ export type ReportOrderByWithRelationInput = {
     description_id?: Prisma.SortOrderInput | Prisma.SortOrder;
     description_en?: Prisma.SortOrderInput | Prisma.SortOrder;
     file_url?: Prisma.SortOrderInput | Prisma.SortOrder;
+    original_filename?: Prisma.SortOrderInput | Prisma.SortOrder;
     publish_at?: Prisma.SortOrder;
     is_publish?: Prisma.SortOrder;
     reportCategoryId?: Prisma.SortOrder;
@@ -214,6 +223,7 @@ export type ReportWhereUniqueInput = Prisma.AtLeast<{
     description_id?: Prisma.StringNullableFilter<"Report"> | string | null;
     description_en?: Prisma.StringNullableFilter<"Report"> | string | null;
     file_url?: Prisma.StringNullableFilter<"Report"> | string | null;
+    original_filename?: Prisma.StringNullableFilter<"Report"> | string | null;
     publish_at?: Prisma.DateTimeFilter<"Report"> | Date | string;
     is_publish?: Prisma.BoolFilter<"Report"> | boolean;
     reportCategoryId?: Prisma.StringFilter<"Report"> | string;
@@ -229,6 +239,7 @@ export type ReportOrderByWithAggregationInput = {
     description_id?: Prisma.SortOrderInput | Prisma.SortOrder;
     description_en?: Prisma.SortOrderInput | Prisma.SortOrder;
     file_url?: Prisma.SortOrderInput | Prisma.SortOrder;
+    original_filename?: Prisma.SortOrderInput | Prisma.SortOrder;
     publish_at?: Prisma.SortOrder;
     is_publish?: Prisma.SortOrder;
     reportCategoryId?: Prisma.SortOrder;
@@ -248,6 +259,7 @@ export type ReportScalarWhereWithAggregatesInput = {
     description_id?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null;
     description_en?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null;
     file_url?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null;
+    original_filename?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null;
     publish_at?: Prisma.DateTimeWithAggregatesFilter<"Report"> | Date | string;
     is_publish?: Prisma.BoolWithAggregatesFilter<"Report"> | boolean;
     reportCategoryId?: Prisma.StringWithAggregatesFilter<"Report"> | string;
@@ -261,6 +273,7 @@ export type ReportCreateInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     createdAt?: Date | string;
@@ -275,6 +288,7 @@ export type ReportUncheckedCreateInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     reportCategoryId: string;
@@ -289,6 +303,7 @@ export type ReportUpdateInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -303,6 +318,7 @@ export type ReportUncheckedUpdateInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     reportCategoryId?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -317,6 +333,7 @@ export type ReportCreateManyInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     reportCategoryId: string;
@@ -330,6 +347,7 @@ export type ReportUpdateManyMutationInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -342,6 +360,7 @@ export type ReportUncheckedUpdateManyInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     reportCategoryId?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -359,6 +378,7 @@ export type ReportCountOrderByAggregateInput = {
     description_id?: Prisma.SortOrder;
     description_en?: Prisma.SortOrder;
     file_url?: Prisma.SortOrder;
+    original_filename?: Prisma.SortOrder;
     publish_at?: Prisma.SortOrder;
     is_publish?: Prisma.SortOrder;
     reportCategoryId?: Prisma.SortOrder;
@@ -372,6 +392,7 @@ export type ReportMaxOrderByAggregateInput = {
     description_id?: Prisma.SortOrder;
     description_en?: Prisma.SortOrder;
     file_url?: Prisma.SortOrder;
+    original_filename?: Prisma.SortOrder;
     publish_at?: Prisma.SortOrder;
     is_publish?: Prisma.SortOrder;
     reportCategoryId?: Prisma.SortOrder;
@@ -385,6 +406,7 @@ export type ReportMinOrderByAggregateInput = {
     description_id?: Prisma.SortOrder;
     description_en?: Prisma.SortOrder;
     file_url?: Prisma.SortOrder;
+    original_filename?: Prisma.SortOrder;
     publish_at?: Prisma.SortOrder;
     is_publish?: Prisma.SortOrder;
     reportCategoryId?: Prisma.SortOrder;
@@ -458,6 +480,7 @@ export type ReportCreateWithoutNewsInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     createdAt?: Date | string;
@@ -471,6 +494,7 @@ export type ReportUncheckedCreateWithoutNewsInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     reportCategoryId: string;
@@ -497,6 +521,7 @@ export type ReportUpdateWithoutNewsInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -510,6 +535,7 @@ export type ReportUncheckedUpdateWithoutNewsInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     reportCategoryId?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -523,6 +549,7 @@ export type ReportCreateWithoutReportCategoryInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     createdAt?: Date | string;
@@ -536,6 +563,7 @@ export type ReportUncheckedCreateWithoutReportCategoryInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     createdAt?: Date | string;
@@ -573,6 +601,7 @@ export type ReportScalarWhereInput = {
     description_id?: Prisma.StringNullableFilter<"Report"> | string | null;
     description_en?: Prisma.StringNullableFilter<"Report"> | string | null;
     file_url?: Prisma.StringNullableFilter<"Report"> | string | null;
+    original_filename?: Prisma.StringNullableFilter<"Report"> | string | null;
     publish_at?: Prisma.DateTimeFilter<"Report"> | Date | string;
     is_publish?: Prisma.BoolFilter<"Report"> | boolean;
     reportCategoryId?: Prisma.StringFilter<"Report"> | string;
@@ -586,6 +615,7 @@ export type ReportCreateManyReportCategoryInput = {
     description_id?: string | null;
     description_en?: string | null;
     file_url?: string | null;
+    original_filename?: string | null;
     publish_at: Date | string;
     is_publish?: boolean;
     createdAt?: Date | string;
@@ -598,6 +628,7 @@ export type ReportUpdateWithoutReportCategoryInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -611,6 +642,7 @@ export type ReportUncheckedUpdateWithoutReportCategoryInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -624,6 +656,7 @@ export type ReportUncheckedUpdateManyWithoutReportCategoryInput = {
     description_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     description_en?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     file_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     publish_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     is_publish?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -660,6 +693,7 @@ export type ReportSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     description_id?: boolean;
     description_en?: boolean;
     file_url?: boolean;
+    original_filename?: boolean;
     publish_at?: boolean;
     is_publish?: boolean;
     reportCategoryId?: boolean;
@@ -676,6 +710,7 @@ export type ReportSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
     description_id?: boolean;
     description_en?: boolean;
     file_url?: boolean;
+    original_filename?: boolean;
     publish_at?: boolean;
     is_publish?: boolean;
     reportCategoryId?: boolean;
@@ -690,6 +725,7 @@ export type ReportSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
     description_id?: boolean;
     description_en?: boolean;
     file_url?: boolean;
+    original_filename?: boolean;
     publish_at?: boolean;
     is_publish?: boolean;
     reportCategoryId?: boolean;
@@ -704,13 +740,14 @@ export type ReportSelectScalar = {
     description_id?: boolean;
     description_en?: boolean;
     file_url?: boolean;
+    original_filename?: boolean;
     publish_at?: boolean;
     is_publish?: boolean;
     reportCategoryId?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type ReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title_id" | "title_en" | "description_id" | "description_en" | "file_url" | "publish_at" | "is_publish" | "reportCategoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["report"]>;
+export type ReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title_id" | "title_en" | "description_id" | "description_en" | "file_url" | "original_filename" | "publish_at" | "is_publish" | "reportCategoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["report"]>;
 export type ReportInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     news?: boolean | Prisma.Report$newsArgs<ExtArgs>;
     reportCategory?: boolean | Prisma.ReportCategoryDefaultArgs<ExtArgs>;
@@ -735,6 +772,7 @@ export type $ReportPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
         description_id: string | null;
         description_en: string | null;
         file_url: string | null;
+        original_filename: string | null;
         publish_at: Date;
         is_publish: boolean;
         reportCategoryId: string;
@@ -1102,6 +1140,7 @@ export interface ReportFieldRefs {
     readonly description_id: Prisma.FieldRef<"Report", 'String'>;
     readonly description_en: Prisma.FieldRef<"Report", 'String'>;
     readonly file_url: Prisma.FieldRef<"Report", 'String'>;
+    readonly original_filename: Prisma.FieldRef<"Report", 'String'>;
     readonly publish_at: Prisma.FieldRef<"Report", 'DateTime'>;
     readonly is_publish: Prisma.FieldRef<"Report", 'Boolean'>;
     readonly reportCategoryId: Prisma.FieldRef<"Report", 'String'>;

@@ -2,11 +2,12 @@ import { envConfig } from "../config/env.config.js";
 import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 export class NewsPageServices {
     static async create(data, file_image) {
         const newNewsPage = await db.newsPage.create({
             data: {
-                hero_bg: `${envConfig.host_url}/storage/images/${file_image.filename}`,
+                hero_bg: `${envConfig.host_url}/images/${file_image.filename}`,
                 newsPageId: {
                     create: {
                         hero_title: data.hero_title,
@@ -65,12 +66,8 @@ export class NewsPageServices {
         const data = await db.newsPage.findUnique({ where: { id } });
         if (!data)
             throw new Error("Not found");
-        // Hapus file fisik
-        const filename = data.hero_bg?.split("/").pop();
-        if (filename) {
-            const filePath = path.join("/apollo/storage/images", filename);
-            if (fs.existsSync(filePath))
-                fs.unlinkSync(filePath);
+        if (data.hero_bg) {
+            deleteWebDavFile(data.hero_bg, "images");
         }
         return await db.$transaction(async (tx) => {
             await tx.newsPageId.delete({ where: { newsPageId: id } });
@@ -86,15 +83,10 @@ export class NewsPageServices {
         if (data.image_status === "change") {
             const oldUrl = existing.hero_bg;
             if (oldUrl) {
-                const oldFilename = oldUrl.split("/").pop();
-                if (oldFilename) {
-                    const oldPath = path.join("/apollo/storage/images", oldFilename);
-                    if (fs.existsSync(oldPath))
-                        fs.unlinkSync(oldPath);
-                }
+                deleteWebDavFile(oldUrl, "images");
             }
             if (file) {
-                newHeroBg = `${envConfig.host_url}/storage/images/${file.filename}`;
+                newHeroBg = `${envConfig.host_url}/images/${file.filename}`;
             }
         }
         return await db.newsPage.update({

@@ -1,12 +1,36 @@
 import type { ReportCreateInput, ReportUpdateInput } from "../models/report.models.js";
 export declare class ReportServices {
-    static create(data: ReportCreateInput, file: Express.Multer.File, newsImage?: Express.Multer.File, newsAuthorImage?: Express.Multer.File): Promise<void>;
+    static create(data: ReportCreateInput, file: Express.Multer.File, newsImage?: Express.Multer.File, newsAuthorImage?: Express.Multer.File): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title_id: string | null;
+        title_en: string | null;
+        description_id: string | null;
+        description_en: string | null;
+        file_url: string | null;
+        original_filename: string | null;
+        publish_at: Date;
+        is_publish: boolean;
+        reportCategoryId: string;
+    }>;
     static getAll(categoryId?: string): Promise<({
         reportCategory: {
             name: string;
             id: string;
             description: string | null;
         };
+        news: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            image: string | null;
+            isPublished: boolean;
+            author: string | null;
+            author_image: string | null;
+            publishedAt: Date;
+            report_id: string | null;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -16,6 +40,7 @@ export declare class ReportServices {
         description_id: string | null;
         description_en: string | null;
         file_url: string | null;
+        original_filename: string | null;
         publish_at: Date;
         is_publish: boolean;
         reportCategoryId: string;
@@ -61,6 +86,7 @@ export declare class ReportServices {
         description_id: string | null;
         description_en: string | null;
         file_url: string | null;
+        original_filename: string | null;
         publish_at: Date;
         is_publish: boolean;
         reportCategoryId: string;
@@ -74,10 +100,20 @@ export declare class ReportServices {
         description_id: string | null;
         description_en: string | null;
         file_url: string | null;
+        original_filename: string | null;
         publish_at: Date;
         is_publish: boolean;
         reportCategoryId: string;
     }>;
     static delete(id: string): Promise<void>;
+    static getDownloadPayload(id: string): Promise<{
+        id: string;
+        file_url: string | null;
+        original_filename: string | null;
+    } | null>;
+    static resolveDownloadFilename(report: {
+        original_filename?: string | null;
+        file_url?: string | null;
+    }): string;
 }
 //# sourceMappingURL=report.services.d.ts.map

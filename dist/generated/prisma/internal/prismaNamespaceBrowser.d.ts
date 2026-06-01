@@ -505,6 +505,7 @@ export declare const ReportScalarFieldEnum: {
     readonly description_id: "description_id";
     readonly description_en: "description_en";
     readonly file_url: "file_url";
+    readonly original_filename: "original_filename";
     readonly publish_at: "publish_at";
     readonly is_publish: "is_publish";
     readonly reportCategoryId: "reportCategoryId";

@@ -46,18 +46,12 @@ const main = async () => {
 
     console.log("Metadata created successfully")
 
-    const hashedPassword = bcrypt.hashSync("10203040", 10)
+    const hashedPassword = bcrypt.hashSync("admin10203040", 10)
     const user = await db.user.createMany({
         data: [{
-            email: "willdan@gmail.com",
+            email: "admin@gmail.com",
             password: hashedPassword,
-            name: "WILLDAN",
-            role: "SUPER_ADMIN"
-        },
-        {
-            email: "zpnever7@gmail.com",
-            password: hashedPassword,
-            name: "willdan",
+            name: "Admin",
             role: "SUPER_ADMIN"
         }]
         ,

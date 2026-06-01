@@ -2,37 +2,24 @@ import fs from "fs";
 import path from "path";
 import "dotenv/config";
 import { db } from "../lib/prisma.js";
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
 export class AboutUsPageServices {
     static getFileUrl(files, fieldName, isMandatory = false) {
         const fileArray = files?.[fieldName];
         if (fileArray && fileArray.length > 0) {
-            return `${process.env.HOST_URL}/storage/images/${fileArray[0]?.filename}`;
+            return `${process.env.HOST_URL}/images/${fileArray[0]?.filename}`;
         }
         if (isMandatory) {
             throw new Error(`Image for '${fieldName}' is required!`);
         }
         return null;
     }
-    // Helper 2: Hapus File Fisik
-    static deleteFile(url) {
-        if (!url)
-            return;
-        const filename = url.split("/").pop();
-        if (filename) {
-            const filePath = path.join(process.cwd(), "storage/images", filename);
-            if (fs.existsSync(filePath))
-                try {
-                    fs.unlinkSync(filePath);
-                }
-                catch { }
-        }
-    }
     // Helper 3: Update Logic (Hapus lama jika ada baru)
     static handleImageUpdate(currentUrl, files, fieldName, isMandatoryForUpdate = false) {
         const newUrl = this.getFileUrl(files, fieldName, false); // false disini, kita cek manual
         if (newUrl) {
             if (currentUrl)
-                this.deleteFile(currentUrl); // Hapus file lama
+                deleteWebDavFile(currentUrl, "images"); // Hapus file lama
             return newUrl;
         }
         // Jika tidak ada file baru, pakai file lama.
@@ -156,7 +143,7 @@ export class AboutUsPageServices {
             // Ambil file berdasarkan index yang dikirim frontend
             if (item.photo_index !== undefined &&
                 governancePhotos[item.photo_index]) {
-                photoUrl = `${process.env.HOST_URL}/storage/images/${governancePhotos[item.photo_index]?.filename}`;
+                photoUrl = `${process.env.HOST_URL}/images/${governancePhotos[item.photo_index]?.filename}`;
             }
             // Validasi Wajib
             if (!photoUrl) {
@@ -179,7 +166,7 @@ export class AboutUsPageServices {
         for (const item of data.company_structure_list) {
             let iconUrl = null;
             if (item.icon_index !== undefined && structureIcons[item.icon_index]) {
-                iconUrl = `${process.env.HOST_URL}/storage/images/${structureIcons[item.icon_index]?.filename}`;
+                iconUrl = `${process.env.HOST_URL}/images/${structureIcons[item.icon_index]?.filename}`;
             }
             if (!iconUrl) {
                 await this.delete(newPage.id);
@@ -286,7 +273,7 @@ export class AboutUsPageServices {
         const deletedGovs = await db.governance.findMany({
             where: { aboutUsPageId: id, id: { notIn: govIdsToKeep } },
         });
-        deletedGovs.forEach((g) => this.deleteFile(g.photo_image));
+        deletedGovs.forEach((g) => deleteWebDavFile(g.photo_image, "images"));
         await db.governance.deleteMany({
             where: { aboutUsPageId: id, id: { notIn: govIdsToKeep } },
         });
@@ -294,7 +281,7 @@ export class AboutUsPageServices {
             let photoUrl = undefined;
             if (item.photo_index !== undefined &&
                 governancePhotos[item.photo_index]) {
-                photoUrl = `${process.env.HOST_URL}/storage/images/${governancePhotos[item.photo_index]?.filename}`;
+                photoUrl = `${process.env.HOST_URL}/images/${governancePhotos[item.photo_index]?.filename}`;
             }
             if (item.id) {
                 // Update: Kalau ada foto baru, ganti. Kalau gak ada, biarkan.
@@ -303,7 +290,7 @@ export class AboutUsPageServices {
                     const oldItem = await db.governance.findUnique({
                         where: { id: item.id },
                     });
-                    this.deleteFile(oldItem?.photo_image || null);
+                    deleteWebDavFile(oldItem?.photo_image || null, "images");
                 }
                 await db.governance.update({
                     where: { id: item.id },
@@ -337,21 +324,21 @@ export class AboutUsPageServices {
         const deletedStructs = await db.companyStructure.findMany({
             where: { aboutUsPageId: id, id: { notIn: structIdsToKeep } },
         });
-        deletedStructs.forEach((c) => this.deleteFile(c.icon_image));
+        deletedStructs.forEach((c) => deleteWebDavFile(c.icon_image, "images"));
         await db.companyStructure.deleteMany({
             where: { aboutUsPageId: id, id: { notIn: structIdsToKeep } },
         });
         for (const item of structureList) {
             let iconUrl = undefined;
             if (item.icon_index !== undefined && structureIcons[item.icon_index]) {
-                iconUrl = `${process.env.HOST_URL}/storage/images/${structureIcons[item.icon_index]?.filename}`;
+                iconUrl = `${process.env.HOST_URL}/images/${structureIcons[item.icon_index]?.filename}`;
             }
             if (item.id) {
                 if (iconUrl) {
                     const oldItem = await db.companyStructure.findUnique({
                         where: { id: item.id },
                     });
-                    this.deleteFile(oldItem?.icon_image || null);
+                    deleteWebDavFile(oldItem?.icon_image ?? null, "images");
                 }
                 await db.companyStructure.update({
                     where: { id: item.id },
@@ -385,15 +372,15 @@ export class AboutUsPageServices {
         if (!data)
             throw new Error("Not found");
         // Hapus fisik semua gambar
-        this.deleteFile(data.hero_bg);
-        this.deleteFile(data.vision_image_parent);
-        this.deleteFile(data.vision_image_child);
-        this.deleteFile(data.mission_image_parent);
-        this.deleteFile(data.mission_image_child);
-        this.deleteFile(data.history_image_parent);
-        this.deleteFile(data.history_image_child);
-        data.governances.forEach((g) => this.deleteFile(g.photo_image));
-        data.companyStructures.forEach((c) => this.deleteFile(c.icon_image));
+        deleteWebDavFile(data.hero_bg, "images");
+        deleteWebDavFile(data.vision_image_parent, "images");
+        deleteWebDavFile(data.vision_image_child, "images");
+        deleteWebDavFile(data.mission_image_parent, "images");
+        deleteWebDavFile(data.mission_image_child, "images");
+        deleteWebDavFile(data.history_image_parent, "images");
+        deleteWebDavFile(data.history_image_child, "images");
+        data.governances.forEach((g) => deleteWebDavFile(g.photo_image, "images"));
+        data.companyStructures.forEach((c) => deleteWebDavFile(c.icon_image, "images"));
         return await db.aboutUsPage.delete({ where: { id } });
     }
 }

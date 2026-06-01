@@ -5,7 +5,6 @@ type UploadedFiles = {
 } | undefined;
 export declare class AboutUsPageServices {
     private static getFileUrl;
-    private static deleteFile;
     private static handleImageUpdate;
     static getAll(): Promise<({
         aboutUsPageId: {

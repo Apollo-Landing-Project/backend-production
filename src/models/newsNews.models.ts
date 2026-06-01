@@ -23,6 +23,9 @@ export const newsNewsCreateSchema = z.object({
 	// Global
 	author: z.string().optional(),
 	isPublished: isPublishedField.default(true),
+    
+    // Optional Report Attachment
+    reportCategoryId: z.string().optional(),
 });
 
 // --- UPDATE SCHEMA ---
@@ -30,6 +33,10 @@ export const newsNewsUpdateSchema = newsNewsCreateSchema.partial().extend({
 	isPublished: isPublishedField,
 	image_status: z.enum(["keep", "change"]),
 	author_image_status: z
+		.enum(["keep", "change", "remove"])
+		.optional()
+		.default("keep"),
+	report_status: z
 		.enum(["keep", "change", "remove"])
 		.optional()
 		.default("keep"),

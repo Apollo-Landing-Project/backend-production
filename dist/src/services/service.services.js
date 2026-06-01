@@ -2,20 +2,8 @@ import { db } from "../lib/prisma.js";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
-const deleteFile = (url) => {
-    if (!url)
-        return;
-    const filename = url.split("/").pop();
-    if (filename) {
-        const filePath = path.join(process.cwd(), "storage/images", filename);
-        if (fs.existsSync(filePath))
-            try {
-                fs.unlinkSync(filePath);
-            }
-            catch { }
-    }
-};
-const getFileUrl = (file) => file ? `${process.env.HOST_URL}/storage/images/${file.filename}` : null;
+import { deleteWebDavFile } from "../utils/webdavDeleteFile.js";
+const getFileUrl = (file) => file ? `${process.env.HOST_URL}/images/${file.filename}` : null;
 export class ServiceItemService {
     static async getAll() {
         return await db.service.findMany({
@@ -29,7 +17,7 @@ export class ServiceItemService {
     static async getById(id) {
         const data = await db.service.findUnique({
             where: { id },
-            include: { serviceId: true, serviceEn: true, },
+            include: { serviceId: true, serviceEn: true },
         });
         if (!data)
             throw new Error("Service not found");
@@ -77,7 +65,7 @@ export class ServiceItemService {
         const existing = await this.getById(id);
         let bg_image = existing.bg_image;
         if (file) {
-            deleteFile(existing.bg_image);
+            deleteWebDavFile(existing.bg_image, "images");
             bg_image = getFileUrl(file);
         }
         return await db.service.update({
@@ -114,7 +102,7 @@ export class ServiceItemService {
     }
     static async delete(id) {
         const existing = await this.getById(id);
-        deleteFile(existing.bg_image);
+        deleteWebDavFile(existing.bg_image, "images");
         return await db.service.delete({ where: { id } });
     }
     static async toggleActive(id) {

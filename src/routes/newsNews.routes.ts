@@ -17,6 +17,7 @@ newsNewsRoutes.post(
     uploadImage.fields([
         { name: "image", maxCount: 1 },
         { name: "author_image", maxCount: 1 },
+        { name: "report_file", maxCount: 1 },
     ]),
     NewsNewsControllers.create,
 );
@@ -29,6 +30,7 @@ newsNewsRoutes.put(
     uploadImage.fields([
         { name: "image", maxCount: 1 },
         { name: "author_image", maxCount: 1 },
+        { name: "report_file", maxCount: 1 },
     ]),
     NewsNewsControllers.update,
 );
