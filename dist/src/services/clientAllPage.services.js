@@ -1,5 +1,6 @@
 import { db } from "../lib/prisma.js";
-const buildReportDownloadUrl = (reportId) => reportId ? `${process.env.HOST_URL || "http://localhost:5050/api"}/client/download/${reportId}` : null;
+import { envConfig } from "../config/env.config.js";
+const buildReportDownloadUrl = (reportId) => reportId ? `${envConfig.api_url}/client/download/${reportId}` : null;
 const normalizeTitle = (value) => {
     if (typeof value !== "string")
         return null;
@@ -46,13 +47,19 @@ export class ClientAllService {
                 isActive: true,
             },
             include: {
-                homePageEn: true,
-                homePageId: true,
                 heroSlides: true,
             },
         });
         if (!home)
             throw new Error("Home Page not found");
+        // Fetch content separately to avoid potential Prisma include issues
+        const [homePageEn, homePageId] = await Promise.all([
+            db.homePageEn.findUnique({ where: { homePageId: home.id } }),
+            db.homePageId.findUnique({ where: { homePageId: home.id } }),
+        ]);
+        const content = lang === "en" ? homePageEn : homePageId;
+        if (!content)
+            throw new Error("Home Page Content not found");
         const serviceItems = await db.service.findMany({
             where: {
                 isActive: true,
@@ -94,7 +101,6 @@ export class ClientAllService {
                 createdAt: "asc",
             },
         });
-        const content = lang === "en" ? home.homePageEn : home.homePageId;
         const heroSlides = lang == "en" ?
             home.heroSlides.map((slide) => ({
                 id: slide.id,
@@ -108,8 +114,6 @@ export class ClientAllService {
                 desc: slide.desc_id,
                 background: slide.bg_image,
             }));
-        if (!content)
-            throw new Error("Home Page Content not found");
         const homeNewsItems = await Promise.all(newsItems.map(async (item) => {
             const linkedReport = await this.resolveLinkedReport({
                 reportId: item.report_id,
@@ -131,9 +135,8 @@ export class ClientAllService {
             };
         }));
         return {
-            id: home.id,
             hero: heroSlides,
-            about: {
+            aboutUs: {
                 badge: content.about_us_badge,
                 title: content.about_us_title,
                 desc: content.about_us_desc,
@@ -146,26 +149,30 @@ export class ClientAllService {
                 badge: content.services_badge,
                 title: content.services_title,
                 desc: content.services_desc,
-                serviceItems: serviceItems.map((item) => ({
-                    id: item.id,
-                    title: lang === "en" ? item.serviceEn?.title : item.serviceId?.title,
-                    desc: lang === "en" ? item.serviceEn?.desc : item.serviceId?.desc,
-                    image: item.bg_image,
-                })),
+                items: serviceItems.map((svc) => {
+                    const svcContent = lang === "en" ? svc.serviceEn : svc.serviceId;
+                    return {
+                        badge: svcContent?.badge,
+                        title: svcContent?.title,
+                        desc: svcContent?.desc_sort || svcContent?.desc,
+                        background: svc.bg_image,
+                    };
+                }),
+            },
+            news: {
+                badge: content.news_badge,
+                title: content.news_title,
+                desc: content.news_desc,
+                items: homeNewsItems,
             },
             partners: {
                 badge: content.partners_badge,
                 title: content.partners_title,
                 desc: content.partners_desc,
-                partnersFunding: partnersFunding.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    image: item.logo_image,
-                })),
-                partnersInsurance: partnersInsurance.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    image: item.logo_image,
+                funding: partnersFunding.map((p) => ({ name: p.name, logo: p.logo_image })),
+                insurance: partnersInsurance.map((p) => ({
+                    name: p.name,
+                    logo: p.logo_image,
                 })),
             },
             contact: {
@@ -184,36 +191,36 @@ export class ClientAllService {
                 isActive: true,
             },
             include: {
-                aboutUsPageEn: true,
-                aboutUsPageId: true,
                 governances: true,
                 companyStructures: true,
             },
         });
         if (!aboutUs)
             throw new Error("About Us Page not found");
-        const content = lang === "en" ? aboutUs.aboutUsPageEn : aboutUs.aboutUsPageId;
+        // Fetch content separately to avoid potential Prisma include issues
+        const [aboutUsEn, aboutUsId] = await Promise.all([
+            db.aboutUsPageEn.findUnique({ where: { aboutUsPageId: aboutUs.id } }),
+            db.aboutUsPageId.findUnique({ where: { aboutUsPageId: aboutUs.id } }),
+        ]);
+        const content = lang === "en" ? aboutUsEn : aboutUsId;
         if (!content)
             throw new Error("About Us Page Content not found");
         // Separate governance into BOC and BOD
         const bocMembers = aboutUs.governances
             .filter((g) => g.position === "BOC")
             .map((g) => ({
-            id: g.id,
             name: g.name,
-            positionDesc: g.position_desc,
             photo: g.photo_image,
+            position: g.position_desc,
         }));
         const bodMembers = aboutUs.governances
             .filter((g) => g.position === "BOD")
             .map((g) => ({
-            id: g.id,
             name: g.name,
-            positionDesc: g.position_desc,
             photo: g.photo_image,
+            position: g.position_desc,
         }));
         return {
-            id: aboutUs.id,
             hero: {
                 badge: content.hero_badge,
                 title: content.hero_title,
@@ -249,10 +256,9 @@ export class ClientAllService {
                 badge: content.company_structure_badge,
                 title: content.company_structure_title,
                 desc: content.company_structure_desc,
-                items: aboutUs.companyStructures.map((cs) => ({
-                    id: cs.id,
-                    name: cs.name,
-                    icon: cs.icon_image,
+                items: aboutUs.companyStructures.map((s) => ({
+                    name: s.name,
+                    icon: s.icon_image,
                 })),
             },
             boc: {
@@ -270,22 +276,23 @@ export class ClientAllService {
         };
     }
     static async getServicePage(lang) {
-        // 1. Get active ServicePage with lang content
+        // 1. Get active ServicePage
         const servicePage = await db.servicePage.findFirst({
             where: {
                 isActive: true,
             },
-            include: {
-                servicePageEn: true,
-                servicePageId: true,
-            },
         });
         if (!servicePage)
             throw new Error("Service Page not found");
-        const pageContent = lang === "en" ? servicePage.servicePageEn : servicePage.servicePageId;
+        // Fetch content separately to avoid potential Prisma include issues
+        const [servicePageEn, servicePageId] = await Promise.all([
+            db.servicePageEn.findUnique({ where: { servicePageId: servicePage.id } }),
+            db.servicePageId.findUnique({ where: { servicePageId: servicePage.id } }),
+        ]);
+        const pageContent = lang === "en" ? servicePageEn : servicePageId;
         if (!pageContent)
             throw new Error("Service Page Content not found");
-        // 2. Get all active services ordered by order
+        // 2. Get active Services
         const services = await db.service.findMany({
             where: {
                 isActive: true,
@@ -307,30 +314,30 @@ export class ClientAllService {
                 order: svc.order,
                 title: svcContent?.title,
                 desc: svcContent?.desc,
+                desc_sort: svcContent?.desc_sort,
                 location: svcContent?.location,
                 contact: svcContent?.contact,
                 email: svcContent?.email,
                 quote: svcContent?.quote,
             };
         });
-        // 3. Get all car gallery items
+        // 3. Get CarGallery
         const carGalleries = await db.carGallery.findMany({
             include: {
                 carGalleryEn: true,
                 carGalleryId: true,
             },
         });
-        const galleryItems = carGalleries.map((car) => {
-            const carContent = lang === "en" ? car.carGalleryEn : car.carGalleryId;
+        const galleryItems = carGalleries.map((gallery) => {
+            const galleryContent = lang === "en" ? gallery.carGalleryEn : gallery.carGalleryId;
             return {
-                id: car.id,
-                image: car.car_image,
-                title: carContent?.title,
-                desc: carContent?.desc,
+                id: gallery.id,
+                image: gallery.car_image,
+                title: galleryContent?.title,
+                desc: galleryContent?.desc,
             };
         });
         return {
-            id: servicePage.id,
             hero: {
                 badge: pageContent.hero_badge,
                 title: pageContent.hero_title,
@@ -347,17 +354,18 @@ export class ClientAllService {
         };
     }
     static async getNewsPage(lang) {
-        // 1. Get active NewsPage with lang content
+        // 1. Get active NewsPage
         const newsPage = await db.newsPage.findFirst({
             where: { isActive: true },
-            include: {
-                newsPageEn: true,
-                newsPageId: true,
-            },
         });
         if (!newsPage)
             throw new Error("News Page not found");
-        const pageContent = lang === "en" ? newsPage.newsPageEn : newsPage.newsPageId;
+        // Fetch content separately to avoid potential Prisma include issues
+        const [newsPageEn, newsPageId] = await Promise.all([
+            db.newsPageEn.findUnique({ where: { newsPageId: newsPage.id } }),
+            db.newsPageId.findUnique({ where: { newsPageId: newsPage.id } }),
+        ]);
+        const pageContent = lang === "en" ? newsPageEn : newsPageId;
         if (!pageContent)
             throw new Error("News Page Content not found");
         // 2. Get published NewsNews
@@ -493,18 +501,22 @@ export class ClientAllService {
     static async getInvestorRelationPage(lang) {
         const investorRelationPage = await db.investorPage.findFirst({
             where: { isActive: true },
-            include: {
-                inverstorPageEn: true,
-                inverstorPageId: true,
-            },
         });
         if (!investorRelationPage)
             throw new Error("Investor Relation Page not found");
-        const content = lang === "en" ?
-            investorRelationPage.inverstorPageEn
-            : investorRelationPage.inverstorPageId;
-        if (!content)
+        // Fetch content separately to avoid potential Prisma include issues
+        const [inverstorPageEn, inverstorPageId] = await Promise.all([
+            db.investorPageEn.findUnique({ where: { investorPageId: investorRelationPage.id } }),
+            db.investorPageId.findUnique({ where: { investorPageId: investorRelationPage.id } }),
+        ]);
+        const pageContent = lang === "en" ? inverstorPageEn : inverstorPageId;
+        if (!pageContent)
             throw new Error("Investor Relation Page Content not found");
+        // Saham
+        const shares = await db.shares.findMany({
+            orderBy: { createdAt: "asc" },
+        });
+        // Reports
         const reports = await db.report.findMany({
             where: {
                 is_publish: true,
@@ -522,25 +534,24 @@ export class ClientAllService {
                 },
             },
         });
-        const shares = await db.shares.findMany();
         return {
             id: investorRelationPage.id,
             hero: {
-                badge: content.hero_badge,
-                title: content.hero_title,
-                desc: content.hero_desc,
+                badge: pageContent.hero_badge,
+                title: pageContent.hero_title,
+                desc: pageContent.hero_desc,
                 background: investorRelationPage.hero_bg,
             },
             stakeholders: {
-                badge: content.stakeholders_badge,
-                title: content.stakeholders_title,
-                desc: content.stakeholders_desc,
-                shares: shares
+                badge: pageContent.stakeholders_badge,
+                title: pageContent.stakeholders_title,
+                desc: pageContent.stakeholders_desc,
+                shares: shares,
             },
             report: {
-                badge: content.report_badge,
-                title: content.report_title,
-                desc: content.report_desc,
+                badge: pageContent.report_badge,
+                title: pageContent.report_title,
+                desc: pageContent.report_desc,
                 reportItems: reports.map((report) => ({
                     id: report.id,
                     news_id: report.news[0]?.id,

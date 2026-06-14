@@ -1,6 +1,7 @@
 import "dotenv/config";
 export declare const envConfig: {
     host_url: string;
+    api_url: string;
     node_env: string;
     port: string | number;
     db_url: string;

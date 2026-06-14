@@ -1,7 +1,18 @@
 import "dotenv/config";
 
+const getApiUrl = () => {
+	if (process.env.API_URL) return process.env.API_URL;
+	const host = process.env.HOST_URL || "";
+	const normalizedHost = host.replace(/\/$/, "");
+	if (normalizedHost === "https://storage.apolloglobalinteractive.com") {
+		return "https://api.apolloglobalinteractive.com/api";
+	}
+	return host || "http://localhost:5050/api";
+};
+
 export const envConfig = {
 	host_url: process.env.HOST_URL || "http://localhost:5050/api",
+	api_url: getApiUrl(),
 	node_env: process.env.NODE_ENV!,
 	port: process.env.PORT || 5050,
 	db_url: process.env.DATABASE_URL!,

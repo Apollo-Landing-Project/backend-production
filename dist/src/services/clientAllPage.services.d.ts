@@ -5,14 +5,13 @@ export declare class ClientAllService {
         description: string | null;
     }>;
     static getHomePage(lang: string): Promise<{
-        id: string;
         hero: {
             id: string;
             title: string | null;
             desc: string | null;
             background: string | null;
         }[];
-        about: {
+        aboutUs: {
             badge: string | null;
             title: string | null;
             desc: string | null;
@@ -25,26 +24,40 @@ export declare class ClientAllService {
             badge: string | null;
             title: string | null;
             desc: string | null;
-            serviceItems: {
+            items: {
+                badge: string | null | undefined;
+                title: string | null | undefined;
+                desc: string | null | undefined;
+                background: string | null;
+            }[];
+        };
+        news: {
+            badge: string | null;
+            title: string | null;
+            desc: string | null;
+            items: {
                 id: string;
                 title: string | null | undefined;
                 desc: string | null | undefined;
+                publishedAt: Date;
                 image: string | null;
+                has_report: boolean;
+                report_id: string | null;
+                download_url: string | null;
+                file_url: string | null;
             }[];
         };
         partners: {
             badge: string | null;
             title: string | null;
             desc: string | null;
-            partnersFunding: {
-                id: string;
+            funding: {
                 name: string | null;
-                image: string | null;
+                logo: string | null;
             }[];
-            partnersInsurance: {
-                id: string;
+            insurance: {
                 name: string | null;
-                image: string | null;
+                logo: string | null;
             }[];
         };
         contact: {
@@ -57,7 +70,6 @@ export declare class ClientAllService {
         };
     }>;
     static getAboutUsPage(lang: string): Promise<{
-        id: string;
         hero: {
             badge: string | null;
             title: string | null;
@@ -94,7 +106,6 @@ export declare class ClientAllService {
             title: string | null;
             desc: string | null;
             items: {
-                id: string;
                 name: string;
                 icon: string | null;
             }[];
@@ -104,10 +115,9 @@ export declare class ClientAllService {
             title: string | null;
             desc: string | null;
             members: {
-                id: string;
                 name: string;
-                positionDesc: string;
                 photo: string | null;
+                position: string;
             }[];
         };
         bod: {
@@ -115,15 +125,13 @@ export declare class ClientAllService {
             title: string | null;
             desc: string | null;
             members: {
-                id: string;
                 name: string;
-                positionDesc: string;
                 photo: string | null;
+                position: string;
             }[];
         };
     }>;
     static getServicePage(lang: string): Promise<{
-        id: string;
         hero: {
             badge: string | null;
             title: string | null;
@@ -137,6 +145,7 @@ export declare class ClientAllService {
             order: number;
             title: string | null | undefined;
             desc: string | null | undefined;
+            desc_sort: string | null | undefined;
             location: string | null | undefined;
             contact: string[] | undefined;
             email: string[] | undefined;
